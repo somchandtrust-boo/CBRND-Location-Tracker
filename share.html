@@ -1,423 +1,637 @@
 <!DOCTYPE html>
 <html lang="hi">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Share Location</title>
+  <title>CBRND - Share Location</title>
 
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-        }
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
 
-        body {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #0f172a, #1e40af);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f172a, #1e40af);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
 
-        .card {
-            width: 100%;
-            max-width: 480px;
-            background: white;
-            padding: 30px;
-            border-radius: 22px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, .3);
-            text-align: center;
-        }
+    .card {
+      width: 100%;
+      max-width: 480px;
+      background: white;
+      padding: 30px;
+      border-radius: 22px;
+      box-shadow: 0 20px 50px rgba(0,0,0,.3);
+      text-align: center;
+    }
 
-        .icon {
-            font-size: 60px;
-            margin-bottom: 10px;
-        }
+    .icon {
+      font-size: 60px;
+      margin-bottom: 10px;
+    }
 
-        h1 {
-            color: #111827;
-            margin-bottom: 10px;
-        }
+    h1 {
+      color: #111827;
+      margin-bottom: 10px;
+    }
 
-        .info {
-            color: #6b7280;
-            line-height: 1.6;
-            margin-bottom: 25px;
-        }
+    .info {
+      color: #6b7280;
+      line-height: 1.6;
+      margin-bottom: 22px;
+    }
 
-        .id {
-            background: #eff6ff;
-            padding: 12px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            word-break: break-all;
-            font-size: 14px;
-            color: #1e40af;
-        }
+    .id-box {
+      background: #eff6ff;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      word-break: break-all;
+      color: #1e40af;
+      font-size: 14px;
+    }
 
-        button {
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 12px;
-            background: #2563eb;
-            color: white;
-            font-size: 17px;
-            font-weight: bold;
-            cursor: pointer;
-        }
+    .button {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      background: #2563eb;
+      color: white;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+    }
 
-        button:hover {
-            background: #1d4ed8;
-        }
+    .button:hover {
+      background: #1d4ed8;
+    }
 
-        button:disabled {
-            background: #9ca3af;
-            cursor: not-allowed;
-        }
+    .button:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
 
-        .status {
-            margin-top: 20px;
-            padding: 14px;
-            border-radius: 10px;
-            display: none;
-            line-height: 1.5;
-        }
+    .stop {
+      background: #dc2626;
+      margin-top: 10px;
+      display: none;
+    }
 
-        .success {
-            display: block;
-            background: #dcfce7;
-            color: #166534;
-        }
+    .stop:hover {
+      background: #b91c1c;
+    }
 
-        .error {
-            display: block;
-            background: #fee2e2;
-            color: #991b1b;
-        }
+    .status {
+      display: none;
+      margin-top: 18px;
+      padding: 13px;
+      border-radius: 10px;
+      line-height: 1.5;
+      font-size: 14px;
+    }
 
-        .location {
-            display: none;
-            margin-top: 15px;
-            text-align: left;
-            background: #f3f4f6;
-            padding: 15px;
-            border-radius: 10px;
-            line-height: 1.8;
-            font-size: 14px;
-        }
+    .success {
+      display: block;
+      background: #dcfce7;
+      color: #166534;
+    }
 
-        .stop {
-            margin-top: 12px;
-            background: #dc2626;
-        }
+    .error {
+      display: block;
+      background: #fee2e2;
+      color: #991b1b;
+    }
 
-        .stop:hover {
-            background: #b91c1c;
-        }
-    </style>
+    .waiting {
+      display: block;
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .location-box {
+      display: none;
+      margin-top: 15px;
+      background: #f3f4f6;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: left;
+      line-height: 1.9;
+      font-size: 14px;
+    }
+
+    .privacy {
+      margin-top: 18px;
+      color: #6b7280;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+  </style>
 </head>
 
 <body>
 
-    <div class="card">
+<div class="card">
 
-        <div class="icon">📍</div>
+  <div class="icon">📍</div>
 
-        <h1>Location Share</h1>
+  <h1>Location Share</h1>
 
-        <p class="info">
-            आपकी Location तभी share होगी जब आप
-            Location Permission को Allow करेंगे।
-        </p>
+  <p class="info">
+    अपनी Location Share करने के लिए नीचे दिए गए
+    button को दबाएँ और Location Permission को Allow करें।
+  </p>
 
-        <div class="id">
-            <strong>Tracking ID:</strong><br>
-            <span id="trackingId">Loading...</span>
-        </div>
+  <div class="id-box">
+    <strong>Tracking ID:</strong><br>
+    <span id="trackingId">Loading...</span>
+  </div>
 
-        <button id="startBtn" onclick="startLocation()">
-            📍 Allow & Share Location
-        </button>
+  <button
+    id="startButton"
+    class="button"
+    onclick="startSharing()"
+  >
+    📍 Allow & Share Location
+  </button>
 
-        <div id="status" class="status"></div>
+  <button
+    id="stopButton"
+    class="button stop"
+    onclick="stopSharing()"
+  >
+    ⛔ Stop Sharing
+  </button>
 
-        <div id="locationBox" class="location">
+  <div
+    id="status"
+    class="status"
+  ></div>
 
-            <strong>Latitude:</strong>
-            <span id="latitude">-</span>
-            <br>
+  <div
+    id="locationBox"
+    class="location-box"
+  >
 
-            <strong>Longitude:</strong>
-            <span id="longitude">-</span>
-            <br>
+    <strong>Latitude:</strong>
+    <span id="latitude">-</span>
 
-            <strong>Accuracy:</strong>
-            <span id="accuracy">-</span>
-            meters
-            <br>
+    <br>
 
-            <strong>Last Update:</strong>
-            <span id="updated">-</span>
+    <strong>Longitude:</strong>
+    <span id="longitude">-</span>
 
-        </div>
+    <br>
 
-        <button id="stopBtn" class="stop" style="display:none" onclick="stopLocation()">
-            ⛔ Stop Sharing
-        </button>
+    <strong>Accuracy:</strong>
+    <span id="accuracy">-</span> meters
 
-    </div>
+    <br>
+
+    <strong>Last Update:</strong>
+    <span id="updated">-</span>
+
+  </div>
+
+  <div class="privacy">
+    🔒 आपकी Location केवल आपकी अनुमति के बाद share होगी।
+    आप किसी भी समय Stop Sharing दबा सकते हैं।
+  </div>
+
+</div>
 
 
-    <script>
+<!-- =====================================================
+     FIREBASE
+===================================================== -->
 
-        let watchID = null;
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 
-        // -----------------------------
-        // GET TRACKING ID
-        // -----------------------------
+<script>
 
-        const params =
-            new URLSearchParams(window.location.search);
+  // =====================================================
+  // FIREBASE CONFIG
+  // =====================================================
 
-        const trackingID =
-            params.get("id");
+  const firebaseConfig = {
 
-        if (trackingID) {
+    apiKey: "YOUR_API_KEY",
 
-            document.getElementById("trackingId")
-                .textContent = trackingID;
+    authDomain:
+      "YOUR_PROJECT.firebaseapp.com",
 
-        } else {
+    databaseURL:
+      "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
 
-            document.getElementById("trackingId")
-                .textContent = "Tracking ID नहीं मिला";
+    projectId:
+      "YOUR_PROJECT_ID",
 
-            document.getElementById("startBtn")
-                .disabled = true;
+    storageBucket:
+      "YOUR_PROJECT.firebasestorage.app",
+
+    messagingSenderId:
+      "YOUR_MESSAGING_SENDER_ID",
+
+    appId:
+      "YOUR_APP_ID"
+
+  };
+
+
+  // =====================================================
+  // INITIALIZE FIREBASE
+  // =====================================================
+
+  let database = null;
+
+  try {
+
+    firebase.initializeApp(
+      firebaseConfig
+    );
+
+    database =
+      firebase.database();
+
+  } catch (error) {
+
+    console.error(
+      "Firebase error:",
+      error
+    );
+
+  }
+
+
+  // =====================================================
+  // TRACKING ID
+  // =====================================================
+
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
+
+  const trackingID =
+    params.get("id");
+
+
+  if (trackingID) {
+
+    document.getElementById(
+      "trackingId"
+    ).textContent =
+      trackingID;
+
+  } else {
+
+    document.getElementById(
+      "trackingId"
+    ).textContent =
+      "Tracking ID नहीं मिला";
+
+    document.getElementById(
+      "startButton"
+    ).disabled = true;
+
+  }
+
+
+  // =====================================================
+  // GPS WATCH ID
+  // =====================================================
+
+  let watchID = null;
+
+
+  // =====================================================
+  // START SHARING
+  // =====================================================
+
+  function startSharing() {
+
+    if (!trackingID) {
+
+      showStatus(
+        "Tracking ID नहीं मिला।",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (!database) {
+
+      showStatus(
+        "Firebase configure नहीं हुआ है।",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (!navigator.geolocation) {
+
+      showStatus(
+        "इस device में GPS Location उपलब्ध नहीं है।",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (
+      !window.isSecureContext
+    ) {
+
+      showStatus(
+        "GPS के लिए HTTPS website जरूरी है।",
+        "error"
+      );
+
+      return;
+    }
+
+
+    showStatus(
+      "📍 Location Permission माँगी जा रही है...",
+      "waiting"
+    );
+
+
+    document.getElementById(
+      "startButton"
+    ).disabled = true;
+
+
+    watchID =
+      navigator.geolocation.watchPosition(
+
+        locationSuccess,
+
+        locationError,
+
+        {
+          enableHighAccuracy: true,
+          maximumAge: 5000,
+          timeout: 15000
         }
 
-
-        // -----------------------------
-        // START LOCATION
-        // -----------------------------
-
-        function startLocation() {
-
-            if (!trackingID) {
-
-                showError(
-                    "Tracking ID उपलब्ध नहीं है।"
-                );
-
-                return;
-            }
-
-            if (!navigator.geolocation) {
-
-                showError(
-                    "आपके device में GPS Location support नहीं है।"
-                );
-
-                return;
-            }
+      );
 
 
-            showStatus(
-                "GPS Location Permission माँगी जा रही है...",
-                "success"
-            );
+    document.getElementById(
+      "stopButton"
+    ).style.display =
+      "block";
+  }
 
 
-            document.getElementById("startBtn")
-                .disabled = true;
+  // =====================================================
+  // LOCATION SUCCESS
+  // =====================================================
+
+  function locationSuccess(
+    position
+  ) {
+
+    const latitude =
+      position.coords.latitude;
+
+    const longitude =
+      position.coords.longitude;
+
+    const accuracy =
+      position.coords.accuracy;
 
 
-            watchID =
-                navigator.geolocation.watchPosition(
-
-                    positionSuccess,
-
-                    positionError,
-
-                    {
-                        enableHighAccuracy: true,
-                        maximumAge: 5000,
-                        timeout: 15000
-                    }
-
-                );
+    document.getElementById(
+      "latitude"
+    ).textContent =
+      latitude.toFixed(6);
 
 
-            document.getElementById("stopBtn")
-                .style.display = "block";
+    document.getElementById(
+      "longitude"
+    ).textContent =
+      longitude.toFixed(6);
+
+
+    document.getElementById(
+      "accuracy"
+    ).textContent =
+      Math.round(accuracy);
+
+
+    document.getElementById(
+      "updated"
+    ).textContent =
+      new Date().toLocaleString();
+
+
+    document.getElementById(
+      "locationBox"
+    ).style.display =
+      "block";
+
+
+    // ===================================================
+    // SAVE TO FIREBASE
+    // ===================================================
+
+    const locationData = {
+
+      latitude:
+        latitude,
+
+      longitude:
+        longitude,
+
+      accuracy:
+        accuracy,
+
+      timestamp:
+        Date.now()
+
+    };
+
+
+    database
+      .ref(
+        "locations/" +
+        trackingID
+      )
+      .set(
+        locationData
+      )
+      .then(
+        function() {
+
+          showStatus(
+            "🟢 Location Live Share हो रही है।",
+            "success"
+          );
+
         }
+      )
+      .catch(
+        function(error) {
 
+          console.error(error);
 
-        // -----------------------------
-        // LOCATION SUCCESS
-        // -----------------------------
+          showStatus(
+            "Firebase में Location save नहीं हुई।",
+            "error"
+          );
 
-        function positionSuccess(position) {
-
-            const latitude =
-                position.coords.latitude;
-
-            const longitude =
-                position.coords.longitude;
-
-            const accuracy =
-                position.coords.accuracy;
-
-
-            document.getElementById("latitude")
-                .textContent =
-                latitude.toFixed(6);
-
-
-            document.getElementById("longitude")
-                .textContent =
-                longitude.toFixed(6);
-
-
-            document.getElementById("accuracy")
-                .textContent =
-                Math.round(accuracy);
-
-
-            document.getElementById("updated")
-                .textContent =
-                new Date().toLocaleTimeString();
-
-
-            document.getElementById("locationBox")
-                .style.display = "block";
-
-
-            showStatus(
-                "✅ आपकी Location successfully प्राप्त हो गई है।",
-                "success"
-            );
-
-
-            /*
-              IMPORTANT:
-          
-              अभी location केवल browser में
-              दिखाई जा रही है।
-          
-              अगले step में Firebase जोड़कर
-              यही location Admin Dashboard
-              तक भेजी जाएगी।
-            */
-
-            console.log({
-                trackingID: trackingID,
-                latitude: latitude,
-                longitude: longitude,
-                accuracy: accuracy,
-                timestamp: Date.now()
-            });
         }
+      );
+
+  }
 
 
-        // -----------------------------
-        // LOCATION ERROR
-        // -----------------------------
+  // =====================================================
+  // LOCATION ERROR
+  // =====================================================
 
-        function positionError(error) {
+  function locationError(
+    error
+  ) {
 
-            let message =
-                "Location प्राप्त नहीं हो सकी।";
-
-            if (error.code === 1) {
-
-                message =
-                    "Location Permission Denied है।";
-
-            } else if (error.code === 2) {
-
-                message =
-                    "Location उपलब्ध नहीं है। GPS चालू करें।";
-
-            } else if (error.code === 3) {
-
-                message =
-                    "Location request का समय समाप्त हो गया।";
-            }
+    let message =
+      "Location प्राप्त नहीं हो सकी।";
 
 
-            showError(message);
+    if (error.code === 1) {
+
+      message =
+        "Location Permission Denied है।";
+
+    }
 
 
-            document.getElementById("startBtn")
-                .disabled = false;
-        }
+    if (error.code === 2) {
+
+      message =
+        "GPS Location उपलब्ध नहीं है।";
+
+    }
 
 
-        // -----------------------------
-        // STOP LOCATION
-        // -----------------------------
+    if (error.code === 3) {
 
-        function stopLocation() {
+      message =
+        "GPS request timeout हो गई।";
 
-            if (watchID !== null) {
-
-                navigator.geolocation.clearWatch(
-                    watchID
-                );
-
-                watchID = null;
-            }
+    }
 
 
-            document.getElementById("startBtn")
-                .disabled = false;
+    showStatus(
+      "❌ " + message,
+      "error"
+    );
 
 
-            document.getElementById("stopBtn")
-                .style.display = "none";
+    document.getElementById(
+      "startButton"
+    ).disabled = false;
+
+  }
 
 
-            showStatus(
-                "⛔ Location sharing बंद कर दी गई है।",
-                "success"
-            );
-        }
+  // =====================================================
+  // STOP SHARING
+  // =====================================================
+
+  function stopSharing() {
+
+    if (
+      watchID !== null
+    ) {
+
+      navigator.geolocation.clearWatch(
+        watchID
+      );
+
+      watchID = null;
+
+    }
 
 
-        // -----------------------------
-        // STATUS
-        // -----------------------------
+    if (
+      database &&
+      trackingID
+    ) {
 
-        function showStatus(message, type) {
+      database
+        .ref(
+          "locations/" +
+          trackingID +
+          "/sharing"
+        )
+        .set(false);
 
-            const status =
-                document.getElementById("status");
-
-            status.textContent = message;
-
-            status.className =
-                "status " + type;
-        }
+    }
 
 
-        function showError(message) {
+    document.getElementById(
+      "startButton"
+    ).disabled = false;
 
-            showStatus(
-                "❌ " + message,
-                "error"
-            );
-        }
 
-    </script>
+    document.getElementById(
+      "stopButton"
+    ).style.display =
+      "none";
+
+
+    showStatus(
+      "⛔ Location Sharing बंद कर दी गई है।",
+      "success"
+    );
+
+  }
+
+
+  // =====================================================
+  // STATUS
+  // =====================================================
+
+  function showStatus(
+    message,
+    type
+  ) {
+
+    const status =
+      document.getElementById(
+        "status"
+      );
+
+
+    status.textContent =
+      message;
+
+
+    status.className =
+      "status " + type;
+
+  }
+
+</script>
 
 </body>
-
 </html>
