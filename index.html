@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="hi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Location Tracker</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #0f172a, #1e3a8a);
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    .logo {
+      text-align: center;
+      font-size: 55px;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #111827;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #6b7280;
+      margin-bottom: 25px;
+      line-height: 1.5;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 12px;
+      background: #2563eb;
+      color: white;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+
+    .btn:hover {
+      background: #1d4ed8;
+    }
+
+    .result {
+      display: none;
+      margin-top: 10px;
+    }
+
+    .label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #374151;
+    }
+
+    .link-box {
+      display: flex;
+      gap: 8px;
+    }
+
+    #trackingLink {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      background: #f9fafb;
+    }
+
+    .copy-btn {
+      padding: 12px 16px;
+      border: none;
+      border-radius: 10px;
+      background: #16a34a;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .copy-btn:hover {
+      background: #15803d;
+    }
+
+    .session {
+      margin-top: 15px;
+      padding: 12px;
+      background: #eff6ff;
+      border-radius: 10px;
+      color: #1e40af;
+      font-size: 14px;
+      word-break: break-all;
+    }
+
+    .admin-btn {
+      display: block;
+      text-align: center;
+      text-decoration: none;
+      color: #2563eb;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+
+    .status {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 14px;
+      color: #16a34a;
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <div class="logo">📍</div>
+
+    <h1>Location Tracker</h1>
+
+    <p class="subtitle">
+      एक सुरक्षित Tracking Link बनाएं और व्यक्ति से
+      उसकी Location Share करवाएं।
+    </p>
+
+    <button class="btn" onclick="createTrackingLink()">
+      🔗 Create Tracking Link
+    </button>
+
+    <div class="result" id="result">
+
+      <span class="label">
+        Tracking Link
+      </span>
+
+      <div class="link-box">
+
+        <input type="text" id="trackingLink" readonly>
+
+        <button class="copy-btn" onclick="copyLink()">
+          Copy
+        </button>
+
+      </div>
+
+      <div class="session">
+        <strong>Tracking ID:</strong>
+        <span id="sessionId"></span>
+      </div>
+
+      <div class="status" id="copyStatus">
+        ✅ Link copied successfully
+      </div>
+
+    </div>
+
+    <a href="admin.html" class="admin-btn">
+      👨‍💼 Open Tracking Dashboard
+    </a>
+
+  </div>
+
+
+  <script>
+
+    function generateTrackingID() {
+
+      const randomPart =
+        Math.random()
+          .toString(36)
+          .substring(2, 8)
+          .toUpperCase();
+
+      const timePart =
+        Date.now()
+          .toString(36)
+          .toUpperCase();
+
+      return randomPart + "-" + timePart;
+    }
+
+
+    function createTrackingLink() {
+
+      const trackingID = generateTrackingID();
+
+      const baseURL =
+        window.location.origin +
+        window.location.pathname
+          .replace("index.html", "");
+
+      const trackingLink =
+        baseURL +
+        "share.html?id=" +
+        encodeURIComponent(trackingID);
+
+      document.getElementById("trackingLink").value =
+        trackingLink;
+
+      document.getElementById("sessionId").textContent =
+        trackingID;
+
+      document.getElementById("result").style.display =
+        "block";
+
+      document.getElementById("copyStatus").style.display =
+        "none";
+
+      console.log("Tracking ID:", trackingID);
+      console.log("Tracking Link:", trackingLink);
+    }
+
+
+    async function copyLink() {
+
+      const input =
+        document.getElementById("trackingLink");
+
+      const link =
+        input.value;
+
+      try {
+
+        await navigator.clipboard.writeText(link);
+
+        document.getElementById("copyStatus").style.display =
+          "block";
+
+        setTimeout(() => {
+
+          document.getElementById("copyStatus").style.display =
+            "none";
+
+        }, 2500);
+
+      } catch (error) {
+
+        input.select();
+
+        document.execCommand("copy");
+
+        document.getElementById("copyStatus").style.display =
+          "block";
+      }
+    }
+
+  </script>
+
+</body>
+
+</html>
