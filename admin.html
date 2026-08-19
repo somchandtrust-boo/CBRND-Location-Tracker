@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="hi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CBRND Location Tracking Dashboard</title>
+
+    <!-- Leaflet Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #0f172a;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #111827;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            border-bottom: 1px solid #374151;
+        }
+
+        .header h1 {
+            font-size: 20px;
+        }
+
+        .online {
+            background: #166534;
+            padding: 7px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+
+        .container {
+            padding: 15px;
+            max-width: 1400px;
+            margin: auto;
+        }
+
+        .control-panel {
+            background: #1e293b;
+            border-radius: 14px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        input {
+            flex: 1;
+            min-width: 240px;
+            padding: 13px;
+            border: 1px solid #475569;
+            border-radius: 9px;
+            background: #0f172a;
+            color: white;
+            outline: none;
+        }
+
+        button {
+            padding: 13px 18px;
+            border: none;
+            border-radius: 9px;
+            background: #2563eb;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 330px 1fr;
+            gap: 15px;
+        }
+
+        .side-panel {
+            background: #1e293b;
+            border-radius: 14px;
+            padding: 18px;
+        }
+
+        .side-panel h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .status-card {
+            background: #0f172a;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
+        }
+
+        .label {
+            color: #94a3b8;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .value {
+            font-size: 16px;
+            font-weight: bold;
+            word-break: break-word;
+        }
+
+        .map-container {
+            background: #1e293b;
+            padding: 8px;
+            border-radius: 14px;
+            min-height: 600px;
+        }
+
+        #map {
+            width: 100%;
+            height: 600px;
+            border-radius: 10px;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 9px;
+            margin-top: 12px;
+            display: none;
+            font-size: 14px;
+        }
+
+        .success {
+            background: #14532d;
+            color: #bbf7d0;
+            display: block;
+        }
+
+        .error {
+            background: #7f1d1d;
+            color: #fecaca;
+            display: block;
+        }
+
+        .waiting {
+            background: #713f12;
+            color: #fef3c7;
+            display: block;
+        }
+
+        .map-button {
+            width: 100%;
+            margin-top: 10px;
+            background: #16a34a;
+        }
+
+        @media (max-width: 800px) {
+
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .map-container {
+                min-height: 450px;
+            }
+
+            #map {
+                height: 450px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="header">
+
+        <h1>
+            📍 CBRND Location Tracking Dashboard
+        </h1>
+
+        <div class="online">
+            🟢 LIVE MONITOR
+        </div>
+
+    </header>
+
+
+    <main class="container">
+
+        <!-- CONTROL PANEL -->
+
+        <section class="control-panel">
+
+            <div class="control-row">
+
+                <input type="text" id="trackingId" placeholder="Tracking ID डालें">
+
+                <button onclick="startTracking()">
+                    🔍 Start Tracking
+                </button>
+
+            </div>
+
+            <div id="message" class="message"></div>
+
+        </section>
+
+
+        <!-- DASHBOARD -->
+
+        <section class="dashboard">
+
+            <!-- SIDE -->
+
+            <aside class="side-panel">
+
+                <h2>📊 Location Information</h2>
+
+
+                <div class="status-card">
+
+                    <div class="label">
+                        Tracking ID
+                    </div>
+
+                    <div class="value" id="displayId">
+                        —
+                    </div>
+
+                </div>
+
+
+                <div class="status-card">
+
+                    <div class="label">
+                        Status
+                    </div>
+
+                    <div class="value" id="locationStatus">
+                        Waiting...
+                    </div>
+
+                </div>
+
+
+                <div class="status-card">
+
+                    <div class="label">
+                        Latitude
+                    </div>
+
+                    <div class="value" id="latitude">
+                        —
+                    </div>
+
+                </div>
+
+
+                <div class="status-card">
+
+                    <div class="label">
+                        Longitude
+                    </div>
+
+                    <div class="value" id="longitude">
+                        —
+                    </div>
+
+                </div>
+
+
+                <div class="status-card">
+
+                    <div class="label">
+                        GPS Accuracy
+                    </div>
+
+                    <div class="value" id="accuracy">
+                        —
+                    </div>
+
+                </div>
+
+
+                <div class="status-card">
+
+                    <div class="label">
+                        Last Update
+                    </div>
+
+                    <div class="value" id="lastUpdate">
+                        —
+                    </div>
+
+                </div>
+
+
+                <button class="map-button" onclick="openGoogleMaps()">
+                    🗺️ Open in Google Maps
+                </button>
+
+            </aside>
+
+
+            <!-- MAP -->
+
+            <div class="map-container">
+
+                <div id="map"></div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- Leaflet -->
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+
+
+    <!-- Firebase Compat -->
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js">
+    </script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js">
+    </script>
+
+
+    <script>
+
+        // =====================================================
+        // FIREBASE CONFIG
+        // =====================================================
+
+        const firebaseConfig = {
+
+            apiKey: "YOUR_API_KEY",
+
+            authDomain:
+                "YOUR_PROJECT.firebaseapp.com",
+
+            databaseURL:
+                "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+
+            projectId:
+                "YOUR_PROJECT_ID",
+
+            storageBucket:
+                "YOUR_PROJECT.firebasestorage.app",
+
+            messagingSenderId:
+                "YOUR_MESSAGING_SENDER_ID",
+
+            appId:
+                "YOUR_APP_ID"
+
+        };
+
+
+        // =====================================================
+        // INITIALIZE FIREBASE
+        // =====================================================
+
+        let database = null;
+
+        try {
+
+            firebase.initializeApp(firebaseConfig);
+
+            database =
+                firebase.database();
+
+        } catch (error) {
+
+            console.error(
+                "Firebase initialization error:",
+                error
+            );
+
+        }
+
+
+        // =====================================================
+        // MAP
+        // =====================================================
+
+        const map =
+            L.map("map").setView(
+                [23.0225, 72.5714],
+                12
+            );
+
+
+        L.tileLayer(
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {
+                maxZoom: 19,
+                attribution:
+                    "&copy; OpenStreetMap contributors"
+            }
+        ).addTo(map);
+
+
+        let marker = null;
+
+        let accuracyCircle = null;
+
+        let currentLatitude = null;
+
+        let currentLongitude = null;
+
+
+        // =====================================================
+        // GET TRACKING ID FROM URL
+        // =====================================================
+
+        const urlParams =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        const urlTrackingId =
+            urlParams.get("id");
+
+
+        if (urlTrackingId) {
+
+            document.getElementById(
+                "trackingId"
+            ).value = urlTrackingId;
+
+            startTracking();
+
+        }
+
+
+        // =====================================================
+        // START TRACKING
+        // =====================================================
+
+        let activeListener = null;
+
+
+        function startTracking() {
+
+            const id =
+                document.getElementById(
+                    "trackingId"
+                ).value.trim();
+
+
+            if (!id) {
+
+                showMessage(
+                    "कृपया Tracking ID डालें।",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            if (!database) {
+
+                showMessage(
+                    "Firebase अभी configure नहीं हुआ है।",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            if (activeListener) {
+
+                activeListener.off();
+
+            }
+
+
+            document.getElementById(
+                "displayId"
+            ).textContent = id;
+
+
+            document.getElementById(
+                "locationStatus"
+            ).textContent =
+                "🟡 Waiting for location...";
+
+
+            showMessage(
+                "Tracking शुरू हो गई है। Location का इंतजार है...",
+                "waiting"
+            );
+
+
+            const locationRef =
+                database.ref(
+                    "locations/" + id
+                );
+
+
+            activeListener = locationRef;
+
+
+            locationRef.on(
+                "value",
+                function (snapshot) {
+
+                    const data =
+                        snapshot.val();
+
+
+                    if (!data) {
+
+                        document.getElementById(
+                            "locationStatus"
+                        ).textContent =
+                            "🟡 Waiting...";
+
+                        showMessage(
+                            "इस Tracking ID से अभी कोई Location प्राप्त नहीं हुई है।",
+                            "waiting"
+                        );
+
+                        return;
+                    }
+
+
+                    updateLocation(data);
+
+                },
+
+                function (error) {
+
+                    console.error(error);
+
+                    showMessage(
+                        "Firebase Database पढ़ने में समस्या हुई।",
+                        "error"
+                    );
+
+                }
+            );
+
+        }
+
+
+        // =====================================================
+        // UPDATE LOCATION
+        // =====================================================
+
+        function updateLocation(data) {
+
+            const lat =
+                Number(
+                    data.latitude
+                );
+
+            const lng =
+                Number(
+                    data.longitude
+                );
+
+
+            if (
+                !Number.isFinite(lat) ||
+                !Number.isFinite(lng)
+            ) {
+
+                showMessage(
+                    "Invalid GPS coordinates प्राप्त हुए।",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            currentLatitude = lat;
+
+            currentLongitude = lng;
+
+
+            const accuracy =
+                Number(
+                    data.accuracy || 0
+                );
+
+
+            document.getElementById(
+                "latitude"
+            ).textContent =
+                lat.toFixed(6);
+
+
+            document.getElementById(
+                "longitude"
+            ).textContent =
+                lng.toFixed(6);
+
+
+            document.getElementById(
+                "accuracy"
+            ).textContent =
+                Math.round(accuracy) + " meters";
+
+
+            let updateTime = "—";
+
+
+            if (data.timestamp) {
+
+                updateTime =
+                    new Date(
+                        Number(data.timestamp)
+                    ).toLocaleString();
+
+            }
+
+
+            document.getElementById(
+                "lastUpdate"
+            ).textContent =
+                updateTime;
+
+
+            document.getElementById(
+                "locationStatus"
+            ).textContent =
+                "🟢 LIVE";
+
+
+            showMessage(
+                "✅ Live Location प्राप्त हो रही है।",
+                "success"
+            );
+
+
+            // -------------------------------------------------
+            // MARKER
+            // -------------------------------------------------
+
+            if (!marker) {
+
+                marker =
+                    L.marker(
+                        [lat, lng]
+                    ).addTo(map);
+
+            } else {
+
+                marker.setLatLng(
+                    [lat, lng]
+                );
+
+            }
+
+
+            marker.bindPopup(
+                `
+          <b>📍 Live Location</b><br>
+          Latitude: ${lat.toFixed(6)}<br>
+          Longitude: ${lng.toFixed(6)}<br>
+          Accuracy: ${Math.round(accuracy)} m
+        `
+            );
+
+
+            // -------------------------------------------------
+            // ACCURACY CIRCLE
+            // -------------------------------------------------
+
+            if (!accuracyCircle) {
+
+                accuracyCircle =
+                    L.circle(
+                        [lat, lng],
+                        {
+                            radius:
+                                accuracy || 10
+                        }
+                    ).addTo(map);
+
+            } else {
+
+                accuracyCircle.setLatLng(
+                    [lat, lng]
+                );
+
+                accuracyCircle.setRadius(
+                    accuracy || 10
+                );
+
+            }
+
+
+            // -------------------------------------------------
+            // CENTER MAP
+            // -------------------------------------------------
+
+            map.setView(
+                [lat, lng],
+                17
+            );
+
+        }
+
+
+        // =====================================================
+        // GOOGLE MAPS
+        // =====================================================
+
+        function openGoogleMaps() {
+
+            if (
+                currentLatitude === null ||
+                currentLongitude === null
+            ) {
+
+                showMessage(
+                    "अभी Location उपलब्ध नहीं है।",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            const url =
+                "https://www.google.com/maps?q=" +
+                currentLatitude +
+                "," +
+                currentLongitude;
+
+
+            window.open(
+                url,
+                "_blank"
+            );
+
+        }
+
+
+        // =====================================================
+        // MESSAGE
+        // =====================================================
+
+        function showMessage(
+            text,
+            type
+        ) {
+
+            const box =
+                document.getElementById(
+                    "message"
+                );
+
+
+            box.textContent = text;
+
+            box.className =
+                "message " + type;
+
+        }
+
+    </script>
+
+</body>
+
+</html>
