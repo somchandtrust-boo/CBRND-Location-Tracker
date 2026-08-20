@@ -537,43 +537,22 @@
   // OPEN ADMIN
   // ==============================================
 
-  function openAdmin() {
+function openAdmin() {
 
-    const trackingID =
-      document.getElementById(
-        "trackingId"
-      ).textContent;
+  const trackingID =
+    document.getElementById("trackingId").textContent.trim();
 
-
-    if (
-      !trackingID ||
-      trackingID === "—"
-    ) {
-
-      return;
-
-    }
-
-
-    const adminURL =
-      window.location.origin +
-      window.location.pathname
-        .replace(
-          "index.html",
-          "admin.html"
-        );
-
-
-    window.open(
-      adminURL +
-      "?id=" +
-      encodeURIComponent(
-        trackingID
-      ),
-      "_blank"
-    );
-
+  if (!trackingID || trackingID === "—") {
+    alert("पहले Tracking Link बनाइए।");
+    return;
   }
+
+  const adminURL =
+    "https://somchandtrust-boo.github.io/CBRND-Location-Tracker/admin.html?id=" +
+    encodeURIComponent(trackingID);
+
+  window.open(adminURL, "_blank");
+}
 
 
 </script>
