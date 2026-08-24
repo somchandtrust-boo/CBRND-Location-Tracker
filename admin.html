@@ -1,1570 +1,600 @@
 <!DOCTYPE html>
 <html lang="hi">
-
 <head>
-
-  <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
-  <title>CBRND Secure Location Admin</title>
-
-  <!-- Leaflet -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  >
-
-  <style>
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-    }
-
-    body {
-      min-height: 100vh;
-      background: #0f172a;
-      color: white;
-    }
-
-    button,
-    input {
-      font-family: inherit;
-    }
-
-    button {
-      cursor: pointer;
-    }
-
-    /* ==================================================
-       LOGIN / REGISTER
-    ================================================== */
-
-    #authScreen {
-      min-height: 100vh;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      padding: 20px;
-
-      background:
-        radial-gradient(
-          circle at top right,
-          #1d4ed8 0,
-          transparent 35%
-        ),
-        linear-gradient(
-          135deg,
-          #020617,
-          #0f172a,
-          #172554
-        );
-    }
-
-    .auth-card {
-      width: 100%;
-      max-width: 440px;
-
-      background: rgba(30, 41, 59, .96);
-
-      border: 1px solid #334155;
-
-      border-radius: 22px;
-
-      padding: 30px;
-
-      box-shadow:
-        0 25px 70px
-        rgba(0, 0, 0, .45);
-    }
-
-    .auth-logo {
-      text-align: center;
-
-      font-size: 55px;
-
-      margin-bottom: 10px;
-    }
-
-    .auth-title {
-      text-align: center;
-
-      font-size: 25px;
-
-      margin-bottom: 7px;
-    }
-
-    .auth-subtitle {
-      text-align: center;
-
-      color: #94a3b8;
-
-      font-size: 14px;
-
-      line-height: 1.5;
-
-      margin-bottom: 22px;
-    }
-
-    .auth-tabs {
-      display: grid;
-
-      grid-template-columns: 1fr 1fr;
-
-      gap: 6px;
-
-      background: #0f172a;
-
-      padding: 5px;
-
-      border-radius: 11px;
-
-      margin-bottom: 20px;
-    }
-
-    .auth-tab {
-      padding: 11px;
-
-      border: none;
-
-      border-radius: 8px;
-
-      background: transparent;
-
-      color: #94a3b8;
-
-      font-weight: bold;
-    }
-
-    .auth-tab.active {
-      background: #2563eb;
-
-      color: white;
-    }
-
-    .form-group {
-      margin-bottom: 14px;
-    }
-
-    .form-group label {
-      display: block;
-
-      color: #cbd5e1;
-
-      font-size: 13px;
-
-      margin-bottom: 6px;
-    }
-
-    .input-wrap {
-      position: relative;
-    }
-
-    .form-input {
-      width: 100%;
-
-      padding: 13px;
-
-      padding-right: 48px;
-
-      border: 1px solid #475569;
-
-      border-radius: 10px;
-
-      background: #0f172a;
-
-      color: white;
-
-      outline: none;
-
-      font-size: 15px;
-    }
-
-    .form-input:focus {
-      border-color: #3b82f6;
-
-      box-shadow:
-        0 0 0 2px
-        rgba(59, 130, 246, .15);
-    }
-
-    .show-password {
-      position: absolute;
-
-      right: 10px;
-
-      top: 50%;
-
-      transform: translateY(-50%);
-
-      border: none;
-
-      background: transparent;
-
-      color: #94a3b8;
-
-      font-size: 18px;
-    }
-
-    .auth-button {
-      width: 100%;
-
-      padding: 14px;
-
-      border: none;
-
-      border-radius: 10px;
-
-      background: #2563eb;
-
-      color: white;
-
-      font-size: 16px;
-
-      font-weight: bold;
-
-      margin-top: 5px;
-    }
-
-    .auth-button:hover {
-      background: #1d4ed8;
-    }
-
-    .forgot-button {
-      width: 100%;
-
-      border: none;
-
-      background: transparent;
-
-      color: #60a5fa;
-
-      margin-top: 15px;
-
-      font-size: 13px;
-    }
-
-    .forgot-button:hover {
-      text-decoration: underline;
-    }
-
-    .auth-message {
-      display: none;
-
-      padding: 11px;
-
-      border-radius: 9px;
-
-      margin-bottom: 15px;
-
-      font-size: 13px;
-
-      line-height: 1.5;
-    }
-
-    .auth-message.success {
-      display: block;
-
-      background: #14532d;
-
-      color: #bbf7d0;
-    }
-
-    .auth-message.error {
-      display: block;
-
-      background: #7f1d1d;
-
-      color: #fecaca;
-    }
-
-    .auth-message.info {
-      display: block;
-
-      background: #1e3a8a;
-
-      color: #bfdbfe;
-    }
-
-    .security-note {
-      margin-top: 18px;
-
-      padding: 10px;
-
-      border-radius: 9px;
-
-      background: #172554;
-
-      color: #bfdbfe;
-
-      font-size: 11px;
-
-      line-height: 1.5;
-
-      text-align: center;
-    }
-
-    /* ==================================================
-       DASHBOARD
-    ================================================== */
-
-    #dashboardScreen {
-      display: none;
-
-      min-height: 100vh;
-    }
-
-    .header {
-      background: #111827;
-
-      border-bottom: 1px solid #374151;
-
-      padding: 14px 20px;
-
-      display: flex;
-
-      align-items: center;
-
-      justify-content: space-between;
-
-      gap: 15px;
-    }
-
-    .header-left {
-      display: flex;
-
-      align-items: center;
-
-      gap: 10px;
-    }
-
-    .header-icon {
-      font-size: 30px;
-    }
-
-    .header-title h1 {
-      font-size: 19px;
-    }
-
-    .header-title small {
-      color: #94a3b8;
-
-      font-size: 11px;
-    }
-
-    .header-right {
-      display: flex;
-
-      align-items: center;
-
-      gap: 8px;
-    }
-
-    .live-badge {
-      background: #14532d;
-
-      color: #bbf7d0;
-
-      padding: 7px 11px;
-
-      border-radius: 20px;
-
-      font-size: 12px;
-
-      font-weight: bold;
-    }
-
-    .logout-button {
-      border: none;
-
-      background: #dc2626;
-
-      color: white;
-
-      padding: 9px 13px;
-
-      border-radius: 8px;
-
-      font-weight: bold;
-    }
-
-    .logout-button:hover {
-      background: #b91c1c;
-    }
-
-    .container {
-      max-width: 1450px;
-
-      margin: auto;
-
-      padding: 15px;
-    }
-
-    .control-panel {
-      background: #1e293b;
-
-      padding: 15px;
-
-      border-radius: 14px;
-
-      margin-bottom: 15px;
-
-      border: 1px solid #334155;
-    }
-
-    .control-row {
-      display: flex;
-
-      gap: 10px;
-
-      flex-wrap: wrap;
-    }
-
-    .tracking-input {
-      flex: 1;
-
-      min-width: 250px;
-
-      padding: 13px;
-
-      border: 1px solid #475569;
-
-      border-radius: 9px;
-
-      background: #0f172a;
-
-      color: white;
-
-      outline: none;
-
-      font-size: 15px;
-    }
-
-    .tracking-input:focus {
-      border-color: #3b82f6;
-    }
-
-    .start-button {
-      padding: 13px 18px;
-
-      border: none;
-
-      border-radius: 9px;
-
-      background: #2563eb;
-
-      color: white;
-
-      font-weight: bold;
-    }
-
-    .start-button:hover {
-      background: #1d4ed8;
-    }
-
-    .message {
-      margin-top: 12px;
-
-      padding: 12px;
-
-      border-radius: 9px;
-
-      font-size: 14px;
-
-      display: none;
-    }
-
-    .message.success {
-      display: block;
-
-      background: #14532d;
-
-      color: #bbf7d0;
-    }
-
-    .message.error {
-      display: block;
-
-      background: #7f1d1d;
-
-      color: #fecaca;
-    }
-
-    .message.waiting {
-      display: block;
-
-      background: #713f12;
-
-      color: #fef3c7;
-    }
-
-    .dashboard {
-      display: grid;
-
-      grid-template-columns: 330px 1fr;
-
-      gap: 15px;
-    }
-
-    .side-panel {
-      background: #1e293b;
-
-      padding: 18px;
-
-      border-radius: 14px;
-
-      border: 1px solid #334155;
-    }
-
-    .side-panel h2 {
-      font-size: 18px;
-
-      margin-bottom: 15px;
-    }
-
-    .status-card {
-      background: #0f172a;
-
-      padding: 13px;
-
-      border-radius: 10px;
-
-      margin-bottom: 10px;
-    }
-
-    .label {
-      color: #94a3b8;
-
-      font-size: 12px;
-
-      margin-bottom: 5px;
-    }
-
-    .value {
-      color: white;
-
-      font-size: 15px;
-
-      font-weight: bold;
-
-      word-break: break-word;
-    }
-
-    .map-container {
-      background: #1e293b;
-
-      padding: 8px;
-
-      border-radius: 14px;
-
-      border: 1px solid #334155;
-    }
-
-    #map {
-      width: 100%;
-
-      height: 620px;
-
-      border-radius: 10px;
-    }
-
-    .map-button,
-    .stop-button {
-      width: 100%;
-
-      padding: 13px;
-
-      border: none;
-
-      border-radius: 9px;
-
-      color: white;
-
-      font-weight: bold;
-
-      margin-top: 5px;
-    }
-
-    .map-button {
-      background: #16a34a;
-    }
-
-    .map-button:hover {
-      background: #15803d;
-    }
-
-    .stop-button {
-      background: #dc2626;
-
-      margin-top: 10px;
-    }
-
-    .stop-button:hover {
-      background: #b91c1c;
-    }
-
-    @media (max-width: 850px) {
-
-      .dashboard {
-        grid-template-columns: 1fr;
-      }
-
-      #map {
-        height: 480px;
-      }
-
-      .header {
-        flex-direction: column;
-
-        align-items: flex-start;
-      }
-
-      .header-right {
-        width: 100%;
-      }
-
-      .live-badge {
-        flex: 1;
-
-        text-align: center;
-      }
-
-    }
-
-  </style>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>CBRND Secure Location Admin</title>
+
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
+body{background:#0f172a;color:#fff;min-height:100vh}
+button,input{font-family:inherit}
+button{cursor:pointer}
+
+#authScreen{
+min-height:100vh;display:flex;align-items:center;justify-content:center;
+padding:20px;
+background:radial-gradient(circle at top right,#1d4ed8 0,transparent 35%),
+linear-gradient(135deg,#020617,#0f172a,#172554)
+}
+
+.auth-card{
+width:100%;max-width:440px;background:#1e293b;
+border:1px solid #334155;border-radius:22px;padding:30px;
+box-shadow:0 25px 70px rgba(0,0,0,.45)
+}
+
+.auth-logo{text-align:center;font-size:52px;margin-bottom:8px}
+.auth-title{text-align:center;font-size:25px}
+.auth-subtitle{text-align:center;color:#94a3b8;font-size:14px;line-height:1.5;margin:7px 0 22px}
+
+.auth-tabs{
+display:grid;grid-template-columns:1fr 1fr;gap:6px;
+background:#0f172a;padding:5px;border-radius:11px;margin-bottom:20px
+}
+
+.auth-tab{
+padding:11px;border:0;border-radius:8px;background:transparent;
+color:#94a3b8;font-weight:bold
+}
+
+.auth-tab.active{background:#2563eb;color:#fff}
+
+.form-group{margin-bottom:14px}
+.form-group label{display:block;color:#cbd5e1;font-size:13px;margin-bottom:6px}
+
+.input-wrap{position:relative}
+.form-input{
+width:100%;padding:13px 45px 13px 13px;border:1px solid #475569;
+border-radius:10px;background:#0f172a;color:#fff;outline:none;font-size:15px
+}
+.form-input:focus{border-color:#3b82f6}
+
+.show-password{
+position:absolute;right:10px;top:50%;transform:translateY(-50%);
+border:0;background:transparent;color:#94a3b8;font-size:18px
+}
+
+.auth-button{
+width:100%;padding:14px;border:0;border-radius:10px;
+background:#2563eb;color:#fff;font-size:16px;font-weight:bold
+}
+.auth-button:hover{background:#1d4ed8}
+
+.forgot-button{
+width:100%;border:0;background:transparent;color:#60a5fa;
+margin-top:15px;font-size:13px
+}
+
+.auth-message{
+display:none;padding:11px;border-radius:9px;margin-bottom:15px;
+font-size:13px;line-height:1.5
+}
+.auth-message.success{display:block;background:#14532d;color:#bbf7d0}
+.auth-message.error{display:block;background:#7f1d1d;color:#fecaca}
+.auth-message.info{display:block;background:#1e3a8a;color:#bfdbfe}
+
+.security-note{
+margin-top:18px;padding:10px;border-radius:9px;background:#172554;
+color:#bfdbfe;font-size:11px;line-height:1.5;text-align:center
+}
+
+#dashboardScreen{display:none;min-height:100vh}
+
+.header{
+background:#111827;border-bottom:1px solid #374151;padding:14px 20px;
+display:flex;align-items:center;justify-content:space-between;gap:15px
+}
+
+.header-left{display:flex;align-items:center;gap:10px}
+.header-icon{font-size:30px}
+.header-title h1{font-size:19px}
+.header-title small{color:#94a3b8;font-size:11px}
+
+.header-right{display:flex;align-items:center;gap:8px}
+.live-badge{
+background:#14532d;color:#bbf7d0;padding:7px 11px;
+border-radius:20px;font-size:12px;font-weight:bold
+}
+
+.logout-button{
+border:0;background:#dc2626;color:#fff;padding:9px 13px;
+border-radius:8px;font-weight:bold
+}
+
+.container{max-width:1450px;margin:auto;padding:15px}
+
+.control-panel{
+background:#1e293b;padding:15px;border-radius:14px;
+margin-bottom:15px;border:1px solid #334155
+}
+
+.control-row{display:flex;gap:10px;flex-wrap:wrap}
+
+.tracking-input{
+flex:1;min-width:250px;padding:13px;border:1px solid #475569;
+border-radius:9px;background:#0f172a;color:#fff;outline:none;font-size:15px
+}
+
+.start-button{
+padding:13px 18px;border:0;border-radius:9px;
+background:#2563eb;color:#fff;font-weight:bold
+}
+
+.message{
+margin-top:12px;padding:12px;border-radius:9px;
+font-size:14px;display:none
+}
+.message.success{display:block;background:#14532d;color:#bbf7d0}
+.message.error{display:block;background:#7f1d1d;color:#fecaca}
+.message.waiting{display:block;background:#713f12;color:#fef3c7}
+
+.dashboard{
+display:grid;grid-template-columns:330px 1fr;gap:15px
+}
+
+.side-panel{
+background:#1e293b;padding:18px;border-radius:14px;
+border:1px solid #334155
+}
+
+.side-panel h2{font-size:18px;margin-bottom:15px}
+
+.status-card{
+background:#0f172a;padding:13px;border-radius:10px;margin-bottom:10px
+}
+
+.label{color:#94a3b8;font-size:12px;margin-bottom:5px}
+.value{color:#fff;font-size:15px;font-weight:bold;word-break:break-word}
+
+.map-container{
+background:#1e293b;padding:8px;border-radius:14px;
+border:1px solid #334155
+}
+
+#map{width:100%;height:620px;border-radius:10px}
+
+.map-button,.stop-button{
+width:100%;padding:13px;border:0;border-radius:9px;
+color:#fff;font-weight:bold;margin-top:5px
+}
+
+.map-button{background:#16a34a}
+.stop-button{background:#dc2626;margin-top:10px}
+
+@media(max-width:850px){
+.dashboard{grid-template-columns:1fr}
+#map{height:480px}
+.header{flex-direction:column;align-items:flex-start}
+.header-right{width:100%}
+.live-badge{flex:1;text-align:center}
+}
+</style>
 </head>
-
 
 <body>
 
-
-<!-- ====================================================
-     AUTH SCREEN
-===================================================== -->
-
+<!-- AUTH -->
 <section id="authScreen">
-
-  <div class="auth-card">
-
-    <div class="auth-logo">
-      🛡️
-    </div>
-
-    <h1 class="auth-title">
-      CBRND Admin
-    </h1>
-
-    <p class="auth-subtitle">
-      Secure Location Tracking Control Panel
-    </p>
-
-
-    <!-- TABS -->
-
-    <div class="auth-tabs">
-
-      <button
-        id="loginTab"
-        class="auth-tab active"
-        type="button"
-        onclick="showLogin()"
-      >
-        🔐 Login
-      </button>
-
-      <button
-        id="registerTab"
-        class="auth-tab"
-        type="button"
-        onclick="showRegister()"
-      >
-        📝 Register
-      </button>
-
-    </div>
-
-
-    <!-- MESSAGE -->
-
-    <div
-      id="authMessage"
-      class="auth-message"
-    ></div>
-
-
-    <!-- LOGIN FORM -->
-
-    <div id="loginForm">
-
-      <div class="form-group">
-
-        <label>
-          📧 Admin Email
-        </label>
-
-        <input
-          id="loginEmail"
-          class="form-input"
-          type="email"
-          placeholder="admin@example.com"
-          autocomplete="email"
-        >
-
-      </div>
-
-
-      <div class="form-group">
-
-        <label>
-          🔑 Password
-        </label>
-
-        <div class="input-wrap">
-
-          <input
-            id="loginPassword"
-            class="form-input"
-            type="password"
-            placeholder="Password"
-            autocomplete="current-password"
-          >
-
-          <button
-            class="show-password"
-            type="button"
-            onclick="togglePassword('loginPassword', this)"
-          >
-            👁️
-          </button>
-
-        </div>
-
-      </div>
-
-
-      <button
-        class="auth-button"
-        type="button"
-        onclick="loginAdmin()"
-      >
-        🔐 Login
-      </button>
-
-
-      <button
-        class="forgot-button"
-        type="button"
-        onclick="forgotPassword()"
-      >
-        🔄 Forgot Password?
-      </button>
-
-    </div>
-
-
-    <!-- REGISTER FORM -->
-
-    <div
-      id="registerForm"
-      style="display:none;"
-    >
-
-      <div class="form-group">
-
-        <label>
-          📧 Email
-        </label>
-
-        <input
-          id="registerEmail"
-          class="form-input"
-          type="email"
-          placeholder="admin@example.com"
-          autocomplete="email"
-        >
-
-      </div>
-
-
-      <div class="form-group">
-
-        <label>
-          🔑 Password
-        </label>
-
-        <div class="input-wrap">
-
-          <input
-            id="registerPassword"
-            class="form-input"
-            type="password"
-            placeholder="Minimum 6 characters"
-            autocomplete="new-password"
-          >
-
-          <button
-            class="show-password"
-            type="button"
-            onclick="togglePassword('registerPassword', this)"
-          >
-            👁️
-          </button>
-
-        </div>
-
-      </div>
-
-
-      <div class="form-group">
-
-        <label>
-          🔐 Confirm Password
-        </label>
-
-        <div class="input-wrap">
-
-          <input
-            id="registerConfirm"
-            class="form-input"
-            type="password"
-            placeholder="Password दोबारा डालें"
-            autocomplete="new-password"
-          >
-
-          <button
-            class="show-password"
-            type="button"
-            onclick="togglePassword('registerConfirm', this)"
-          >
-            👁️
-          </button>
-
-        </div>
-
-      </div>
-
-
-      <div class="form-group">
-
-        <label>
-          🛡️ Admin Registration Code
-        </label>
-
-        <div class="input-wrap">
-
-          <input
-            id="inviteCode"
-            class="form-input"
-            type="password"
-            placeholder="Registration Code"
-            autocomplete="off"
-          >
-
-          <button
-            class="show-password"
-            type="button"
-            onclick="togglePassword('inviteCode', this)"
-          >
-            👁️
-          </button>
-
-        </div>
-
-      </div>
-
-
-      <button
-        class="auth-button"
-        type="button"
-        onclick="registerAdmin()"
-      >
-        📝 Create Admin Account
-      </button>
-
-    </div>
-
-
-    <div class="security-note">
-
-      🔒 केवल authorized व्यक्ति ही Admin Registration
-      Code के द्वारा account बना सकता है।
-
-    </div>
-
-  </div>
-
+<div class="auth-card">
+
+<div class="auth-logo">🛡️</div>
+<h1 class="auth-title">CBRND Admin</h1>
+<p class="auth-subtitle">
+Secure Location Tracking Control Panel
+</p>
+
+<div class="auth-tabs">
+<button id="loginTab" class="auth-tab active"
+onclick="showLogin()">🔐 Login</button>
+
+<button id="registerTab" class="auth-tab"
+onclick="showRegister()">📝 Register</button>
+</div>
+
+<div id="authMessage" class="auth-message"></div>
+
+<!-- LOGIN -->
+<div id="loginForm">
+
+<div class="form-group">
+<label>📧 Admin Email</label>
+<input id="loginEmail" class="form-input"
+type="email" placeholder="admin@example.com">
+</div>
+
+<div class="form-group">
+<label>🔑 Password</label>
+<div class="input-wrap">
+<input id="loginPassword" class="form-input"
+type="password" placeholder="Password">
+<button class="show-password"
+onclick="togglePassword('loginPassword',this)">👁️</button>
+</div>
+</div>
+
+<button class="auth-button" onclick="loginAdmin()">
+🔐 Login
+</button>
+
+<button class="forgot-button" onclick="forgotPassword()">
+🔄 Forgot Password?
+</button>
+
+</div>
+
+<!-- REGISTER -->
+<div id="registerForm" style="display:none">
+
+<div class="form-group">
+<label>📧 Email</label>
+<input id="registerEmail" class="form-input"
+type="email" placeholder="admin@example.com">
+</div>
+
+<div class="form-group">
+<label>🔑 Password</label>
+<div class="input-wrap">
+<input id="registerPassword" class="form-input"
+type="password" placeholder="Minimum 6 characters">
+<button class="show-password"
+onclick="togglePassword('registerPassword',this)">👁️</button>
+</div>
+</div>
+
+<div class="form-group">
+<label>🔐 Confirm Password</label>
+<div class="input-wrap">
+<input id="registerConfirm" class="form-input"
+type="password" placeholder="Password दोबारा डालें">
+<button class="show-password"
+onclick="togglePassword('registerConfirm',this)">👁️</button>
+</div>
+</div>
+
+<div class="form-group">
+<label>🛡️ Admin Registration Code</label>
+<div class="input-wrap">
+<input id="inviteCode" class="form-input"
+type="password" placeholder="Registration Code">
+<button class="show-password"
+onclick="togglePassword('inviteCode',this)">👁️</button>
+</div>
+</div>
+
+<button class="auth-button" onclick="registerAdmin()">
+📝 Create Admin Account
+</button>
+
+</div>
+
+<div class="security-note">
+🔒 Authorized Admin Registration Code के बिना account नहीं बनाया जा सकता।
+</div>
+
+</div>
 </section>
 
 
-
-<!-- ====================================================
-     DASHBOARD SCREEN
-===================================================== -->
-
+<!-- DASHBOARD -->
 <section id="dashboardScreen">
 
+<header class="header">
 
-  <header class="header">
+<div class="header-left">
+<div class="header-icon">📍</div>
 
-    <div class="header-left">
+<div class="header-title">
+<h1>CBRND Live Location Admin</h1>
+<small id="adminEmailDisplay">Admin</small>
+</div>
+</div>
 
-      <div class="header-icon">
-        📍
-      </div>
+<div class="header-right">
+<div class="live-badge">🟢 SECURE ADMIN</div>
 
-      <div class="header-title">
+<button class="logout-button"
+onclick="logoutAdmin()">
+🚪 Logout
+</button>
+</div>
 
-        <h1>
-          CBRND Live Location Admin
-        </h1>
+</header>
 
-        <small id="adminEmailDisplay">
-          Admin
-        </small>
 
-      </div>
+<main class="container">
 
-    </div>
+<section class="control-panel">
 
+<div class="control-row">
 
-    <div class="header-right">
+<input id="trackingId"
+class="tracking-input"
+placeholder="Tracking ID डालें">
 
-      <div class="live-badge">
-        🟢 SECURE ADMIN
-      </div>
+<button class="start-button"
+onclick="startTracking()">
+🔍 Start Tracking
+</button>
 
-      <button
-        class="logout-button"
-        type="button"
-        onclick="logoutAdmin()"
-      >
-        🚪 Logout
-      </button>
+</div>
 
-    </div>
-
-  </header>
-
-
-  <main class="container">
-
-
-    <!-- TRACKING CONTROL -->
-
-    <section class="control-panel">
-
-      <div class="control-row">
-
-        <input
-          id="trackingId"
-          class="tracking-input"
-          type="text"
-          placeholder="Tracking ID डालें"
-        >
-
-        <button
-          class="start-button"
-          type="button"
-          onclick="startTracking()"
-        >
-          🔍 Start Tracking
-        </button>
-
-      </div>
-
-
-      <div
-        id="message"
-        class="message"
-      ></div>
-
-    </section>
-
-
-    <!-- DASHBOARD -->
-
-    <section class="dashboard">
-
-
-      <!-- SIDE PANEL -->
-
-      <aside class="side-panel">
-
-        <h2>
-          📊 Location Information
-        </h2>
-
-
-        <div class="status-card">
-
-          <div class="label">
-            Tracking ID
-          </div>
-
-          <div
-            id="displayId"
-            class="value"
-          >
-            —
-          </div>
-
-        </div>
-
-
-        <div class="status-card">
-
-          <div class="label">
-            Connection Status
-          </div>
-
-          <div
-            id="locationStatus"
-            class="value"
-          >
-            ⚪ Waiting
-          </div>
-
-        </div>
-
-
-        <div class="status-card">
-
-          <div class="label">
-            Latitude
-          </div>
-
-          <div
-            id="latitude"
-            class="value"
-          >
-            —
-          </div>
-
-        </div>
-
-
-        <div class="status-card">
-
-          <div class="label">
-            Longitude
-          </div>
-
-          <div
-            id="longitude"
-            class="value"
-          >
-            —
-          </div>
-
-        </div>
-
-
-        <div class="status-card">
-
-          <div class="label">
-            GPS Accuracy
-          </div>
-
-          <div
-            id="accuracy"
-            class="value"
-          >
-            —
-          </div>
-
-        </div>
-
-
-        <div class="status-card">
-
-          <div class="label">
-            Last Update
-          </div>
-
-          <div
-            id="lastUpdate"
-            class="value"
-          >
-            —
-          </div>
-
-        </div>
-
-
-        <button
-          class="map-button"
-          type="button"
-          onclick="openGoogleMaps()"
-        >
-          🗺️ Open Google Maps
-        </button>
-
-
-        <button
-          class="stop-button"
-          type="button"
-          onclick="stopTracking()"
-        >
-          ⛔ Stop Tracking
-        </button>
-
-      </aside>
-
-
-      <!-- MAP -->
-
-      <div class="map-container">
-
-        <div id="map"></div>
-
-      </div>
-
-    </section>
-
-  </main>
+<div id="message" class="message"></div>
 
 </section>
 
 
+<section class="dashboard">
 
-<!-- ====================================================
-     FIREBASE
-===================================================== -->
+<aside class="side-panel">
 
-<script
-  src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js">
-</script>
+<h2>📊 Location Information</h2>
 
-<script
-  src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js">
-</script>
+<div class="status-card">
+<div class="label">Tracking ID</div>
+<div id="displayId" class="value">—</div>
+</div>
 
-<script
-  src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js">
-</script>
+<div class="status-card">
+<div class="label">Connection Status</div>
+<div id="locationStatus" class="value">⚪ Waiting</div>
+</div>
+
+<div class="status-card">
+<div class="label">Latitude</div>
+<div id="latitude" class="value">—</div>
+</div>
+
+<div class="status-card">
+<div class="label">Longitude</div>
+<div id="longitude" class="value">—</div>
+</div>
+
+<div class="status-card">
+<div class="label">GPS Accuracy</div>
+<div id="accuracy" class="value">—</div>
+</div>
+
+<div class="status-card">
+<div class="label">Last Update</div>
+<div id="lastUpdate" class="value">—</div>
+</div>
+
+<button class="map-button"
+onclick="openGoogleMaps()">
+🗺️ Open Google Maps
+</button>
+
+<button class="stop-button"
+onclick="stopTracking()">
+⛔ Stop Tracking
+</button>
+
+</aside>
+
+<div class="map-container">
+<div id="map"></div>
+</div>
+
+</section>
+</main>
+</section>
 
 
-<!-- ====================================================
-     LEAFLET
-===================================================== -->
-
-<script
-  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 
 <script>
 
-
 /* =====================================================
    FIREBASE CONFIG
+   अपनी EXISTING CONFIG यहाँ रखें
 ===================================================== */
 
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-        const firebaseConfig = {
-            apiKey: "AIzaSyBBoLatjHkL56Lm0viPXcV91xcLewrosmI",
-            authDomain: "cbrnd-location-tracker.firebaseapp.com",
-            databaseURL: "https://cbrnd-location-tracker-default-rtdb.asia-southeast1.firebasedatabase.app/",
-            projectId: "cbrnd-location-tracker",
-            storageBucket: "cbrnd-location-tracker.firebasestorage.app",
-            messagingSenderId: "513696622411",
-            appId: "1:513696622411:web:52df6f0833380f76802ace",
-            measurementId: "G-GCDRNNZQVY"
-        };
+const firebaseConfig = {
+
+apiKey:"YOUR_API_KEY",
+
+authDomain:
+"cbrnd-location-tracker.firebaseapp.com",
+
+databaseURL:
+"https://cbrnd-location-tracker-default-rtdb.asia-southeast1.firebasedatabase.app",
+
+projectId:
+"cbrnd-location-tracker",
+
+storageBucket:
+"YOUR_STORAGE_BUCKET",
+
+messagingSenderId:
+"YOUR_MESSAGING_SENDER_ID",
+
+appId:
+"YOUR_APP_ID"
+
+};
 
 
 /* =====================================================
-   ADMIN REGISTRATION CODE
+   ADMIN INVITE CODE
 ===================================================== */
 
-/*
-  यहाँ अपना secret registration code रखें.
-
-  उदाहरण:
-  CBRND-ADMIN-2026
-
-  इसे अपनी पसंद के code से बदलें.
-*/
-
 const ADMIN_INVITE_CODE =
-  "CBRND-ADMIN-2026";
+"CBRND-ADMIN-2026";
+
+
+/* =====================================================
+   GLOBAL VARIABLES
+===================================================== */
+
+let auth = null;
+let database = null;
+
+let activeListener = null;
+
+let map = null;
+let marker = null;
+let accuracyCircle = null;
+
+let currentLatitude = null;
+let currentLongitude = null;
+
+let firstLocationReceived = false;
+
+let lastAcceptedLat = null;
+let lastAcceptedLng = null;
+
+let animationFrame = null;
 
 
 /* =====================================================
    FIREBASE INIT
 ===================================================== */
 
-let firebaseReady = false;
+try{
 
-let auth = null;
+firebase.initializeApp(firebaseConfig);
 
-let database = null;
+auth = firebase.auth();
 
+database = firebase.database();
 
-try {
+auth.onAuthStateChanged(function(user){
 
-  firebase.initializeApp(
-    firebaseConfig
-  );
+if(user){
+showDashboard(user);
+}else{
+showAuthScreen();
+}
 
-  auth =
-    firebase.auth();
+});
 
-  database =
-    firebase.database();
+}catch(error){
 
-  firebaseReady = true;
+console.error(error);
 
-} catch (error) {
-
-  console.error(
-    "Firebase initialization error:",
-    error
-  );
-
-  showAuthMessage(
-    "Firebase initialization error. Config check करें।",
-    "error"
-  );
+showAuthMessage(
+"Firebase configuration में समस्या है।",
+"error"
+);
 
 }
 
 
 /* =====================================================
-   GLOBAL TRACKING VARIABLES
+   AUTH
 ===================================================== */
 
-let activeListener = null;
+function showLogin(){
 
-let marker = null;
+document.getElementById("loginForm").style.display="block";
+document.getElementById("registerForm").style.display="none";
 
-let accuracyCircle = null;
+document.getElementById("loginTab").classList.add("active");
+document.getElementById("registerTab").classList.remove("active");
 
-let currentLatitude = null;
+clearAuthMessage();
 
-let currentLongitude = null;
-
-
-/* =====================================================
-   MAP
-===================================================== */
-
-let map = null;
+}
 
 
-function initializeMap() {
+function showRegister(){
 
-  if (map) {
-    return;
-  }
+document.getElementById("loginForm").style.display="none";
+document.getElementById("registerForm").style.display="block";
 
+document.getElementById("loginTab").classList.remove("active");
+document.getElementById("registerTab").classList.add("active");
 
-  map =
-    L.map(
-      "map"
-    ).setView(
-      [23.0225, 72.5714],
-      12
-    );
-
-
-  L.tileLayer(
-    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    {
-      maxZoom: 19,
-
-      attribution:
-        "&copy; OpenStreetMap contributors"
-    }
-  ).addTo(
-    map
-  );
+clearAuthMessage();
 
 }
 
 
 /* =====================================================
-   AUTH STATE
+   REGISTER
 ===================================================== */
 
-if (firebaseReady) {
+async function registerAdmin(){
 
-  auth.onAuthStateChanged(
-    function(user) {
+const email =
+document.getElementById("registerEmail").value.trim();
 
-      if (user) {
+const password =
+document.getElementById("registerPassword").value;
 
-        showDashboard(
-          user
-        );
+const confirm =
+document.getElementById("registerConfirm").value;
 
-      } else {
+const code =
+document.getElementById("inviteCode").value.trim();
 
-        showAuthScreen();
 
-      }
+if(!email){
+showAuthMessage("Email डालें।","error");
+return;
+}
 
-    }
-  );
+if(password.length < 6){
+showAuthMessage(
+"Password कम से कम 6 characters का होना चाहिए।",
+"error"
+);
+return;
+}
 
+if(password !== confirm){
+showAuthMessage(
+"Password और Confirm Password अलग हैं।",
+"error"
+);
+return;
+}
+
+if(code !== ADMIN_INVITE_CODE){
+showAuthMessage(
+"❌ गलत Admin Registration Code।",
+"error"
+);
+return;
 }
 
 
-/* =====================================================
-   SHOW LOGIN
-===================================================== */
-
-function showLogin() {
-
-  document.getElementById(
-    "loginForm"
-  ).style.display =
-    "block";
+showAuthMessage(
+"Account बनाया जा रहा है...",
+"info"
+);
 
 
-  document.getElementById(
-    "registerForm"
-  ).style.display =
-    "none";
+try{
 
+await auth.createUserWithEmailAndPassword(
+email,
+password
+);
 
-  document.getElementById(
-    "loginTab"
-  ).classList.add(
-    "active"
-  );
+showAuthMessage(
+"✅ Admin account successfully बनाया गया।",
+"success"
+);
 
+}catch(error){
 
-  document.getElementById(
-    "registerTab"
-  ).classList.remove(
-    "active"
-  );
+console.error(error);
 
-
-  clearAuthMessage();
+showAuthMessage(
+firebaseError(error),
+"error"
+);
 
 }
-
-
-/* =====================================================
-   SHOW REGISTER
-===================================================== */
-
-function showRegister() {
-
-  document.getElementById(
-    "loginForm"
-  ).style.display =
-    "none";
-
-
-  document.getElementById(
-    "registerForm"
-  ).style.display =
-    "block";
-
-
-  document.getElementById(
-    "loginTab"
-  ).classList.remove(
-    "active"
-  );
-
-
-  document.getElementById(
-    "registerTab"
-  ).classList.add(
-    "active"
-  );
-
-
-  clearAuthMessage();
-
-}
-
-
-/* =====================================================
-   REGISTER ADMIN
-===================================================== */
-
-async function registerAdmin() {
-
-  if (!firebaseReady) {
-
-    showAuthMessage(
-      "Firebase connection उपलब्ध नहीं है।",
-      "error"
-    );
-
-    return;
-  }
-
-
-  const email =
-    document.getElementById(
-      "registerEmail"
-    ).value.trim();
-
-
-  const password =
-    document.getElementById(
-      "registerPassword"
-    ).value;
-
-
-  const confirmPassword =
-    document.getElementById(
-      "registerConfirm"
-    ).value;
-
-
-  const inviteCode =
-    document.getElementById(
-      "inviteCode"
-    ).value.trim();
-
-
-  /* -----------------------------------------------
-     EMAIL
-  ----------------------------------------------- */
-
-  if (!email) {
-
-    showAuthMessage(
-      "Email डालें।",
-      "error"
-    );
-
-    return;
-  }
-
-
-  /* -----------------------------------------------
-     PASSWORD
-  ----------------------------------------------- */
-
-  if (!password) {
-
-    showAuthMessage(
-      "Password डालें।",
-      "error"
-    );
-
-    return;
-  }
-
-
-  if (password.length < 6) {
-
-    showAuthMessage(
-      "Password कम से कम 6 characters का होना चाहिए।",
-      "error"
-    );
-
-    return;
-  }
-
-
-  /* -----------------------------------------------
-     CONFIRM
-  ----------------------------------------------- */
-
-  if (
-    password !==
-    confirmPassword
-  ) {
-
-    showAuthMessage(
-      "Password और Confirm Password अलग हैं।",
-      "error"
-    );
-
-    return;
-  }
-
-
-  /* -----------------------------------------------
-     INVITE CODE
-  ----------------------------------------------- */
-
-  if (!inviteCode) {
-
-    showAuthMessage(
-      "Admin Registration Code डालें।",
-      "error"
-    );
-
-    return;
-  }
-
-
-  if (
-    inviteCode !==
-    ADMIN_INVITE_CODE
-  ) {
-
-    showAuthMessage(
-      "❌ गलत Admin Registration Code।",
-      "error"
-    );
-
-    return;
-  }
-
-
-  /* -----------------------------------------------
-     CREATE ACCOUNT
-  ----------------------------------------------- */
-
-  showAuthMessage(
-    "Account बनाया जा रहा है...",
-    "info"
-  );
-
-
-  try {
-
-    const result =
-      await auth.createUserWithEmailAndPassword(
-        email,
-        password
-      );
-
-
-    if (result.user) {
-
-      showAuthMessage(
-        "✅ Admin Account successfully बनाया गया। Login हो रहा है...",
-        "success"
-      );
-
-    }
-
-  } catch (error) {
-
-    console.error(
-      error
-    );
-
-
-    showAuthMessage(
-      getFirebaseErrorMessage(
-        error
-      ),
-      "error"
-    );
-
-  }
 
 }
 
@@ -1573,82 +603,49 @@ async function registerAdmin() {
    LOGIN
 ===================================================== */
 
-async function loginAdmin() {
+async function loginAdmin(){
 
-  if (!firebaseReady) {
+const email =
+document.getElementById("loginEmail").value.trim();
 
-    showAuthMessage(
-      "Firebase connection उपलब्ध नहीं है।",
-      "error"
-    );
-
-    return;
-  }
+const password =
+document.getElementById("loginPassword").value;
 
 
-  const email =
-    document.getElementById(
-      "loginEmail"
-    ).value.trim();
+if(!email){
+showAuthMessage("Email डालें।","error");
+return;
+}
+
+if(!password){
+showAuthMessage("Password डालें।","error");
+return;
+}
 
 
-  const password =
-    document.getElementById(
-      "loginPassword"
-    ).value;
+showAuthMessage(
+"Login हो रहा है...",
+"info"
+);
 
 
-  if (!email) {
+try{
 
-    showAuthMessage(
-      "Email डालें।",
-      "error"
-    );
+await auth.signInWithEmailAndPassword(
+email,
+password
+);
 
-    return;
-  }
+}catch(error){
 
+console.error(error);
 
-  if (!password) {
+showAuthMessage(
+firebaseError(error),
+"error"
+);
 
-    showAuthMessage(
-      "Password डालें।",
-      "error"
-    );
-
-    return;
-  }
-
-
-  showAuthMessage(
-    "Login हो रहा है...",
-    "info"
-  );
-
-
-  try {
-
-    await auth.signInWithEmailAndPassword(
-      email,
-      password
-    );
-
-
-  } catch (error) {
-
-    console.error(
-      error
-    );
-
-
-    showAuthMessage(
-      getFirebaseErrorMessage(
-        error
-      ),
-      "error"
-    );
-
-  }
+}
 
 }
 
@@ -1657,64 +654,40 @@ async function loginAdmin() {
    FORGOT PASSWORD
 ===================================================== */
 
-async function forgotPassword() {
+async function forgotPassword(){
 
-  if (!firebaseReady) {
-
-    showAuthMessage(
-      "Firebase connection उपलब्ध नहीं है।",
-      "error"
-    );
-
-    return;
-  }
+const email =
+document.getElementById("loginEmail").value.trim();
 
 
-  const email =
-    document.getElementById(
-      "loginEmail"
-    ).value.trim();
+if(!email){
+
+showAuthMessage(
+"पहले Email डालें।",
+"error"
+);
+
+return;
+}
 
 
-  if (!email) {
+try{
 
-    showAuthMessage(
-      "पहले Login Email डालें।",
-      "error"
-    );
+await auth.sendPasswordResetEmail(email);
 
-    return;
-  }
+showAuthMessage(
+"✅ Password reset link email पर भेज दिया गया है।",
+"success"
+);
 
+}catch(error){
 
-  try {
+showAuthMessage(
+firebaseError(error),
+"error"
+);
 
-    await auth.sendPasswordResetEmail(
-      email
-    );
-
-
-    showAuthMessage(
-      "✅ Password reset link आपके email पर भेज दिया गया है।",
-      "success"
-    );
-
-
-  } catch (error) {
-
-    console.error(
-      error
-    );
-
-
-    showAuthMessage(
-      getFirebaseErrorMessage(
-        error
-      ),
-      "error"
-    );
-
-  }
+}
 
 }
 
@@ -1723,27 +696,15 @@ async function forgotPassword() {
    LOGOUT
 ===================================================== */
 
-async function logoutAdmin() {
+async function logoutAdmin(){
 
-  if (!auth) {
-    return;
-  }
+stopTracking();
 
-
-  stopTracking();
-
-
-  try {
-
-    await auth.signOut();
-
-  } catch (error) {
-
-    console.error(
-      error
-    );
-
-  }
+try{
+await auth.signOut();
+}catch(error){
+console.error(error);
+}
 
 }
 
@@ -1752,132 +713,112 @@ async function logoutAdmin() {
    SHOW DASHBOARD
 ===================================================== */
 
-function showDashboard(
-  user
-) {
+function showDashboard(user){
 
-  document.getElementById(
-    "authScreen"
-  ).style.display =
-    "none";
+document.getElementById("authScreen").style.display="none";
+document.getElementById("dashboardScreen").style.display="block";
 
+document.getElementById("adminEmailDisplay").textContent =
+user.email || "Authorized Admin";
 
-  document.getElementById(
-    "dashboardScreen"
-  ).style.display =
-    "block";
+initializeMap();
 
 
-  document.getElementById(
-    "adminEmailDisplay"
-  ).textContent =
-    user.email ||
-    "Authorized Admin";
+setTimeout(function(){
+
+if(map){
+map.invalidateSize();
+}
+
+},300);
 
 
-  initializeMap();
+/* URL tracking */
+
+const params =
+new URLSearchParams(window.location.search);
+
+const id =
+params.get("id");
 
 
-  setTimeout(
-    function() {
+if(id){
 
-      if (map) {
+document.getElementById("trackingId").value=id;
 
-        map.invalidateSize();
+setTimeout(function(){
+startTracking();
+},500);
 
-      }
-
-    },
-    250
-  );
-
-
-  /*
-    URL में id हो तो automatic tracking
-  */
-
-  const params =
-    new URLSearchParams(
-      window.location.search
-    );
-
-
-  const urlTrackingId =
-    params.get(
-      "id"
-    );
-
-
-  if (urlTrackingId) {
-
-    document.getElementById(
-      "trackingId"
-    ).value =
-      urlTrackingId;
-
-
-    startTracking();
-
-  }
+}
 
 }
 
 
 /* =====================================================
-   SHOW AUTH SCREEN
+   AUTH SCREEN
 ===================================================== */
 
-function showAuthScreen() {
+function showAuthScreen(){
 
-  document.getElementById(
-    "authScreen"
-  ).style.display =
-    "flex";
-
-
-  document.getElementById(
-    "dashboardScreen"
-  ).style.display =
-    "none";
+document.getElementById("authScreen").style.display="flex";
+document.getElementById("dashboardScreen").style.display="none";
 
 }
 
 
 /* =====================================================
-   PASSWORD VISIBILITY
+   MAP
 ===================================================== */
 
-function togglePassword(
-  inputId,
-  button
-) {
+function initializeMap(){
 
-  const input =
-    document.getElementById(
-      inputId
-    );
+if(map)return;
+
+map =
+L.map("map").setView(
+[23.0225,72.5714],
+12
+);
 
 
-  if (
-    input.type ===
-    "password"
-  ) {
+L.tileLayer(
+"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+{
+maxZoom:19,
+attribution:"© OpenStreetMap contributors"
+}
+).addTo(map);
 
-    input.type =
-      "text";
+}
 
-    button.textContent =
-      "🙈";
 
-  } else {
+/* =====================================================
+   DISTANCE
+===================================================== */
 
-    input.type =
-      "password";
+function calculateDistance(
+lat1,lon1,lat2,lon2
+){
 
-    button.textContent =
-      "👁️";
+const R=6371000;
 
-  }
+const dLat =
+(lat2-lat1)*Math.PI/180;
+
+const dLon =
+(lon2-lon1)*Math.PI/180;
+
+const a =
+Math.sin(dLat/2)**2 +
+Math.cos(lat1*Math.PI/180) *
+Math.cos(lat2*Math.PI/180) *
+Math.sin(dLon/2)**2;
+
+return R*2*Math.atan2(
+Math.sqrt(a),
+Math.sqrt(1-a)
+);
 
 }
 
@@ -1886,417 +827,472 @@ function togglePassword(
    START TRACKING
 ===================================================== */
 
-function startTracking() {
+function startTracking(){
 
-  const id =
-    document.getElementById(
-      "trackingId"
-    ).value.trim();
+const id =
+document.getElementById("trackingId").value.trim();
 
 
-  if (!id) {
+if(!id){
 
-    showMessage(
-      "कृपया Tracking ID डालें।",
-      "error"
-    );
+showMessage(
+"कृपया Tracking ID डालें।",
+"error"
+);
 
-    return;
-  }
+return;
 
+}
 
-  if (!database) {
 
-    showMessage(
-      "Firebase Database उपलब्ध नहीं है।",
-      "error"
-    );
+if(!database){
 
-    return;
-  }
+showMessage(
+"Firebase Database उपलब्ध नहीं है।",
+"error"
+);
 
+return;
 
-  /*
-    पुराने listener को हटाएँ
-  */
+}
 
-  if (activeListener) {
 
-    try {
+/* पुराने listener को हटाएँ */
 
-      activeListener.off();
+if(activeListener){
 
-    } catch (error) {
+try{
+activeListener.off();
+}catch(e){
+console.error(e);
+}
 
-      console.error(
-        error
-      );
+activeListener=null;
 
-    }
+}
 
-    activeListener =
-      null;
 
-  }
+if(animationFrame){
 
+cancelAnimationFrame(animationFrame);
 
-  currentLatitude =
-    null;
+animationFrame=null;
 
-  currentLongitude =
-    null;
+}
 
 
-  document.getElementById(
-    "displayId"
-  ).textContent =
-    id;
+firstLocationReceived=false;
 
+lastAcceptedLat=null;
+lastAcceptedLng=null;
 
-  document.getElementById(
-    "latitude"
-  ).textContent =
-    "—";
+currentLatitude=null;
+currentLongitude=null;
 
 
-  document.getElementById(
-    "longitude"
-  ).textContent =
-    "—";
+document.getElementById("displayId").textContent=id;
 
+document.getElementById("locationStatus").textContent=
+"🟡 Connecting...";
 
-  document.getElementById(
-    "accuracy"
-  ).textContent =
-    "—";
 
+showMessage(
+"Live tracking शुरू हो गई है...",
+"waiting"
+);
 
-  document.getElementById(
-    "lastUpdate"
-  ).textContent =
-    "—";
 
+const locationRef =
+database.ref(
+"locations/"+id
+);
 
-  document.getElementById(
-    "locationStatus"
-  ).textContent =
-    "🟡 Waiting...";
 
+activeListener =
+locationRef;
 
-  showMessage(
-    "Tracking शुरू हो गई है। Location का इंतजार है...",
-    "waiting"
-  );
 
+/* Firebase realtime listener */
 
-  const locationRef =
-    database.ref(
-      "locations/" +
-      id
-    );
+locationRef.on(
+"value",
+function(snapshot){
 
+const data=snapshot.val();
 
-  activeListener =
-    locationRef;
+if(!data){
 
+document.getElementById(
+"locationStatus"
+).textContent="🟡 Waiting...";
 
-  locationRef.on(
+showMessage(
+"इस Tracking ID से अभी Location नहीं मिली।",
+"waiting"
+);
 
-    "value",
+return;
 
-    function(snapshot) {
+}
 
-      const data =
-        snapshot.val();
+processLocation(data);
 
+},
+function(error){
 
-      console.log(
-        "Firebase location data:",
-        data
-      );
+console.error(error);
 
+showMessage(
+"Firebase error: "+error.message,
+"error"
+);
 
-      if (!data) {
-
-        document.getElementById(
-          "locationStatus"
-        ).textContent =
-          "🟡 Waiting...";
-
-
-        showMessage(
-          "इस Tracking ID से अभी Location प्राप्त नहीं हुई है।",
-          "waiting"
-        );
-
-        return;
-
-      }
-
-
-      updateLocation(
-        data
-      );
-
-    },
-
-
-    function(error) {
-
-      console.error(
-        "Firebase listener error:",
-        error
-      );
-
-
-      if (
-        error &&
-        error.code ===
-        "PERMISSION_DENIED"
-      ) {
-
-        showMessage(
-          "Firebase Permission Denied. Database Rules में authenticated users को read permission दें।",
-          "error"
-        );
-
-      } else {
-
-        showMessage(
-          "Firebase से Location पढ़ने में समस्या हुई।",
-          "error"
-        );
-
-      }
-
-    }
-
-  );
+}
+);
 
 }
 
 
 /* =====================================================
-   UPDATE LOCATION
+   PROCESS LOCATION
 ===================================================== */
 
-function updateLocation(
-  data
-) {
+function processLocation(data){
 
-  const lat =
-    Number(
-      data.latitude
-    );
+const lat=Number(data.latitude);
+const lng=Number(data.longitude);
 
+const accuracy=Number(data.accuracy || 0);
 
-  const lng =
-    Number(
-      data.longitude
-    );
 
+if(
+!Number.isFinite(lat) ||
+!Number.isFinite(lng)
+){
+return;
+}
 
-  if (
-    !Number.isFinite(lat) ||
-    !Number.isFinite(lng)
-  ) {
 
-    showMessage(
-      "Firebase से Invalid GPS coordinates मिले।",
-      "error"
-    );
+/* छोटी GPS noise ignore */
 
-    return;
+if(
+lastAcceptedLat!==null &&
+lastAcceptedLng!==null
+){
 
-  }
+const distance =
+calculateDistance(
+lastAcceptedLat,
+lastAcceptedLng,
+lat,
+lng
+);
 
 
-  currentLatitude =
-    lat;
+/*
+  2 meter से कम movement
+  और poor accuracy होने पर
+  marker को unnecessary move नहीं करेंगे.
+*/
 
-  currentLongitude =
-    lng;
+if(
+distance<2 &&
+accuracy>20
+){
 
+updateInformation(
+lat,lng,accuracy,data
+);
 
-  const accuracy =
-    Number(
-      data.accuracy ||
-      0
-    );
+return;
 
+}
 
-  document.getElementById(
-    "latitude"
-  ).textContent =
-    lat.toFixed(6);
+}
 
 
-  document.getElementById(
-    "longitude"
-  ).textContent =
-    lng.toFixed(6);
+lastAcceptedLat=lat;
+lastAcceptedLng=lng;
 
 
-  document.getElementById(
-    "accuracy"
-  ).textContent =
-    Math.round(
-      accuracy
-    ) +
-    " meters";
+updateInformation(
+lat,lng,accuracy,data
+);
 
 
-  let updateTime =
-    "—";
+if(!firstLocationReceived){
 
+firstLocationReceived=true;
 
-  if (
-    data.timestamp
-  ) {
+currentLatitude=lat;
+currentLongitude=lng;
 
-    const date =
-      new Date(
-        Number(
-          data.timestamp
-        )
-      );
+createMarker(
+lat,lng,accuracy
+);
 
 
-    if (
-      !Number.isNaN(
-        date.getTime()
-      )
-    ) {
+map.setView(
+[lat,lng],
+17,
+{
+animate:true,
+duration:.7
+}
+);
 
-      updateTime =
-        date.toLocaleString();
+return;
 
-    }
+}
 
-  }
 
+/* Smooth marker movement */
 
-  document.getElementById(
-    "lastUpdate"
-  ).textContent =
-    updateTime;
+smoothMoveMarker(
+lat,lng,accuracy
+);
 
+}
 
-  document.getElementById(
-    "locationStatus"
-  ).textContent =
-    "🟢 LIVE";
 
+/* =====================================================
+   CREATE MARKER
+===================================================== */
 
-  showMessage(
-    "✅ Live Location प्राप्त हो रही है।",
-    "success"
-  );
+function createMarker(
+lat,lng,accuracy
+){
 
+if(!marker){
 
-  /*
-    Marker
-  */
+marker =
+L.marker(
+[lat,lng],
+{
+riseOnHover:true
+}
+).addTo(map);
 
-  if (!marker) {
 
-    marker =
-      L.marker(
-        [lat, lng]
-      ).addTo(
-        map
-      );
+marker.bindPopup(
+"📍 Live Location"
+);
 
-  } else {
+}
 
-    marker.setLatLng(
-      [lat, lng]
-    );
 
-  }
+if(!accuracyCircle){
 
+accuracyCircle =
+L.circle(
+[lat,lng],
+{
+radius:Math.max(
+accuracy,
+10
+),
+weight:1,
+fillOpacity:.12
+}
+).addTo(map);
 
-  /*
-    Popup
-  */
+}
 
-  marker.bindPopup(
+}
 
-    `
-      <div style="font-size:14px">
 
-        <b>📍 LIVE LOCATION</b>
+/* =====================================================
+   SMOOTH MARKER
+===================================================== */
 
-        <br><br>
+function smoothMoveMarker(
+targetLat,
+targetLng,
+accuracy
+){
 
-        <b>Latitude:</b>
-        ${lat.toFixed(6)}
+if(!marker){
 
-        <br>
+createMarker(
+targetLat,
+targetLng,
+accuracy
+);
 
-        <b>Longitude:</b>
-        ${lng.toFixed(6)}
+return;
 
-        <br>
+}
 
-        <b>Accuracy:</b>
-        ${Math.round(accuracy)} m
 
-        <br>
+const start =
+marker.getLatLng();
 
-        <b>Updated:</b>
-        ${updateTime}
 
-      </div>
-    `
+const startLat=start.lat;
+const startLng=start.lng;
 
-  );
+const duration=700;
 
+const startTime=performance.now();
 
-  /*
-    Accuracy Circle
-  */
 
-  if (!accuracyCircle) {
+if(animationFrame){
 
-    accuracyCircle =
-      L.circle(
-        [lat, lng],
-        {
-          radius:
-            Math.max(
-              accuracy,
-              10
-            )
-        }
-      ).addTo(
-        map
-      );
+cancelAnimationFrame(
+animationFrame
+);
 
-  } else {
+}
 
-    accuracyCircle.setLatLng(
-      [lat, lng]
-    );
 
-    accuracyCircle.setRadius(
-      Math.max(
-        accuracy,
-        10
-      )
-    );
+function animate(now){
 
-  }
+let progress =
+(now-startTime)/duration;
 
 
-  /*
-    Center map
-  */
+if(progress>1)
+progress=1;
 
-  map.setView(
-    [lat, lng],
-    17
-  );
+
+const eased =
+1-Math.pow(
+1-progress,
+3
+);
+
+
+const lat =
+startLat+
+(targetLat-startLat)*
+eased;
+
+
+const lng =
+startLng+
+(targetLng-startLng)*
+eased;
+
+
+marker.setLatLng(
+[lat,lng]
+);
+
+
+if(accuracyCircle){
+
+accuracyCircle.setLatLng(
+[lat,lng]
+);
+
+accuracyCircle.setRadius(
+Math.max(
+accuracy,
+10
+)
+);
+
+}
+
+
+if(progress<1){
+
+animationFrame =
+requestAnimationFrame(
+animate
+);
+
+}else{
+
+marker.setLatLng(
+[targetLat,targetLng]
+);
+
+if(accuracyCircle){
+
+accuracyCircle.setLatLng(
+[targetLat,targetLng]
+);
+
+}
+
+}
+
+}
+
+
+animationFrame =
+requestAnimationFrame(
+animate
+);
+
+}
+
+
+/* =====================================================
+   LOCATION INFORMATION
+===================================================== */
+
+function updateInformation(
+lat,lng,accuracy,data
+){
+
+currentLatitude=lat;
+currentLongitude=lng;
+
+
+document.getElementById(
+"latitude"
+).textContent=
+lat.toFixed(6);
+
+
+document.getElementById(
+"longitude"
+).textContent=
+lng.toFixed(6);
+
+
+document.getElementById(
+"accuracy"
+).textContent=
+Math.round(accuracy)+" meters";
+
+
+let time="—";
+
+
+if(data.timestamp){
+
+const date =
+new Date(
+Number(data.timestamp)
+);
+
+if(!Number.isNaN(date.getTime())){
+
+time =
+date.toLocaleString();
+
+}
+
+}
+
+
+document.getElementById(
+"lastUpdate"
+).textContent=time;
+
+
+document.getElementById(
+"locationStatus"
+).textContent="🟢 LIVE";
+
+
+showMessage(
+"✅ Live Location connected",
+"success"
+);
 
 }
 
@@ -2305,277 +1301,248 @@ function updateLocation(
    STOP TRACKING
 ===================================================== */
 
-function stopTracking() {
+function stopTracking(){
 
-  if (activeListener) {
+if(activeListener){
 
-    try {
+try{
+activeListener.off();
+}catch(e){
+console.error(e);
+}
 
-      activeListener.off();
+activeListener=null;
 
-    } catch (error) {
-
-      console.error(
-        error
-      );
-
-    }
-
-    activeListener =
-      null;
-
-  }
+}
 
 
-  document.getElementById(
-    "locationStatus"
-  ).textContent =
-    "⛔ Stopped";
+if(animationFrame){
+
+cancelAnimationFrame(
+animationFrame
+);
+
+animationFrame=null;
+
+}
 
 
-  showMessage(
-    "Admin tracking listener बंद कर दिया गया है।",
-    "waiting"
-  );
+firstLocationReceived=false;
+
+currentLatitude=null;
+currentLongitude=null;
+
+
+document.getElementById(
+"locationStatus"
+).textContent=
+"⛔ Stopped";
+
+
+showMessage(
+"Tracking बंद कर दी गई है।",
+"waiting"
+);
 
 }
 
 
 /* =====================================================
-   GOOGLE MAPS
+   GOOGLE MAP
 ===================================================== */
 
-function openGoogleMaps() {
+function openGoogleMaps(){
 
-  if (
-    currentLatitude === null ||
-    currentLongitude === null
-  ) {
+if(
+currentLatitude===null ||
+currentLongitude===null
+){
 
-    showMessage(
-      "अभी Location उपलब्ध नहीं है।",
-      "error"
-    );
+showMessage(
+"अभी Location उपलब्ध नहीं है।",
+"error"
+);
 
-    return;
+return;
 
-  }
-
-
-  const url =
-    "https://www.google.com/maps?q=" +
-    currentLatitude +
-    "," +
-    currentLongitude;
+}
 
 
-  window.open(
-    url,
-    "_blank"
-  );
+window.open(
+"https://www.google.com/maps?q="+
+currentLatitude+
+","+
+currentLongitude,
+"_blank"
+);
 
 }
 
 
 /* =====================================================
-   AUTH MESSAGE
+   PASSWORD
+===================================================== */
+
+function togglePassword(
+id,button
+){
+
+const input =
+document.getElementById(id);
+
+
+if(input.type==="password"){
+
+input.type="text";
+button.textContent="🙈";
+
+}else{
+
+input.type="password";
+button.textContent="👁️";
+
+}
+
+}
+
+
+/* =====================================================
+   MESSAGES
 ===================================================== */
 
 function showAuthMessage(
-  text,
-  type
-) {
+text,type
+){
 
-  const box =
-    document.getElementById(
-      "authMessage"
-    );
+const box =
+document.getElementById(
+"authMessage"
+);
 
+box.textContent=text;
 
-  box.textContent =
-    text;
-
-
-  box.className =
-    "auth-message " +
-    type;
+box.className=
+"auth-message "+type;
 
 }
 
 
-function clearAuthMessage() {
+function clearAuthMessage(){
 
-  const box =
-    document.getElementById(
-      "authMessage"
-    );
+const box =
+document.getElementById(
+"authMessage"
+);
 
+box.textContent="";
 
-  box.textContent =
-    "";
-
-
-  box.className =
-    "auth-message";
+box.className=
+"auth-message";
 
 }
 
-
-/* =====================================================
-   DASHBOARD MESSAGE
-===================================================== */
 
 function showMessage(
-  text,
-  type
-) {
+text,type
+){
 
-  const box =
-    document.getElementById(
-      "message"
-    );
+const box =
+document.getElementById(
+"message"
+);
 
+box.textContent=text;
 
-  if (!box) {
-    return;
-  }
-
-
-  box.textContent =
-    text;
-
-
-  box.className =
-    "message " +
-    type;
+box.className=
+"message "+type;
 
 }
 
 
 /* =====================================================
-   FIREBASE ERROR TRANSLATION
+   FIREBASE ERROR
 ===================================================== */
 
-function getFirebaseErrorMessage(
-  error
-) {
+function firebaseError(error){
 
-  const code =
-    error &&
-    error.code
-      ? error.code
-      : "";
+const code =
+error && error.code
+?error.code:"";
 
 
-  switch (code) {
+switch(code){
 
-    case "auth/email-already-in-use":
+case "auth/email-already-in-use":
+return "यह Email पहले से registered है। Login करें।";
 
-      return "यह Email पहले से registered है। Login करें।";
+case "auth/invalid-email":
+return "Email address सही नहीं है।";
 
+case "auth/weak-password":
+return "Password कम से कम 6 characters का रखें।";
 
-    case "auth/invalid-email":
+case "auth/user-not-found":
+return "यह account मौजूद नहीं है।";
 
-      return "Email address सही नहीं है।";
+case "auth/wrong-password":
+return "Password गलत है।";
 
+case "auth/invalid-credential":
+return "Email या Password गलत है।";
 
-    case "auth/weak-password":
+case "auth/operation-not-allowed":
+return "Firebase Authentication में Email/Password अभी Enable नहीं है।";
 
-      return "Password बहुत कमजोर है। कम से कम 6 characters रखें।";
+case "auth/too-many-requests":
+return "बहुत ज्यादा attempts हुए हैं। थोड़ी देर बाद कोशिश करें।";
 
+case "auth/network-request-failed":
+return "Internet connection check करें।";
 
-    case "auth/user-not-found":
+default:
+return error?.message || "Unknown Firebase error";
 
-      return "यह Admin account मौजूद नहीं है।";
-
-
-    case "auth/wrong-password":
-
-      return "Password गलत है।";
-
-
-    case "auth/invalid-credential":
-
-      return "Email या Password गलत है।";
-
-
-    case "auth/too-many-requests":
-
-      return "बहुत ज्यादा attempts हुए हैं। थोड़ी देर बाद फिर कोशिश करें।";
-
-
-    case "auth/network-request-failed":
-
-      return "Internet connection check करें।";
-
-
-    default:
-
-      return (
-        error &&
-        error.message
-      )
-        ? error.message
-        : "एक unknown error हुआ है।";
-
-  }
+}
 
 }
 
 
 /* =====================================================
-   ENTER KEY SUPPORT
+   ENTER KEY
 ===================================================== */
 
 document.addEventListener(
-  "keydown",
-  function(event) {
+"keydown",
+function(e){
 
-    if (
-      event.key !==
-      "Enter"
-    ) {
-      return;
-    }
+if(e.key!=="Enter")return;
 
 
-    const loginForm =
-      document.getElementById(
-        "loginForm"
-      );
-
-
-    const registerForm =
-      document.getElementById(
-        "registerForm"
-      );
-
-
-    if (
-      loginForm &&
-      loginForm.style.display !==
-      "none"
-    ) {
-
-      loginAdmin();
-
-      return;
-
-    }
-
-
-    if (
-      registerForm &&
-      registerForm.style.display !==
-      "none"
-    ) {
-
-      registerAdmin();
-
-    }
-
-  }
+const login =
+document.getElementById(
+"loginForm"
 );
+
+
+const register =
+document.getElementById(
+"registerForm"
+);
+
+
+if(
+login.style.display!=="none"
+){
+
+loginAdmin();
+
+}else{
+
+registerAdmin();
+
+}
+
+});
 
 
 /* =====================================================
@@ -2583,31 +1550,28 @@ document.addEventListener(
 ===================================================== */
 
 document.addEventListener(
-  "visibilitychange",
-  function() {
+"visibilitychange",
+function(){
 
-    if (
-      document.visibilityState ===
-      "visible" &&
-      map
-    ) {
+if(
+document.visibilityState==="visible" &&
+map
+){
 
-      setTimeout(
-        function() {
+setTimeout(
+function(){
 
-          map.invalidateSize();
+map.invalidateSize();
 
-        },
-        200
-      );
-
-    }
-
-  }
+},
+200
 );
+
+}
+
+});
 
 </script>
 
 </body>
-
 </html>
