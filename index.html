@@ -1,563 +1,2691 @@
 <!DOCTYPE html>
 <html lang="hi">
-
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-  <meta charset="UTF-8">
+<title>CBRND Location Tracker</title>
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+<!-- =====================================================
+     FIREBASE SDK — MUST LOAD BEFORE OUR JAVASCRIPT
+===================================================== -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
-  <title>CBRND Location Tracker</title>
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
 
-  <style>
+:root{
+    --bg:#020611;
+    --panel:#050b18;
+    --panel2:#071122;
+    --cyan:#00d9ff;
+    --blue:#087cff;
+    --purple:#8b2cff;
+    --green:#00ff88;
+    --red:#ff3158;
+    --yellow:#ffc400;
+    --text:#e7f7ff;
+    --muted:#8094ad;
+    --border:#073c62;
+}
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
+html,body{
+    width:100%;
+    min-height:100%;
+}
+
+body{
+    background:
+        radial-gradient(circle at 70% 0%,rgba(0,80,180,.16),transparent 30%),
+        radial-gradient(circle at 100% 70%,rgba(110,0,255,.10),transparent 25%),
+        #020611;
+    color:var(--text);
+    font-family:Arial,Helvetica,sans-serif;
+    overflow-x:hidden;
+}
+
+body:before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    opacity:.18;
+    background-image:
+        linear-gradient(rgba(0,217,255,.08) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(0,217,255,.08) 1px,transparent 1px);
+    background-size:50px 50px;
+}
+
+/* =====================================================
+   APP
+===================================================== */
+
+.app{
+    min-height:100vh;
+    display:flex;
+}
+
+/* =====================================================
+   SIDEBAR
+===================================================== */
+
+.sidebar{
+    width:245px;
+    min-height:100vh;
+    background:
+        linear-gradient(180deg,rgba(2,9,22,.98),rgba(1,6,16,.98));
+    border-right:1px solid #06406a;
+    padding:20px 15px;
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
+    z-index:20;
+}
+
+.logo{
+    text-align:center;
+    padding:8px 0 20px;
+    border-bottom:1px solid #062b49;
+}
+
+.logo-orbit{
+    width:75px;
+    height:75px;
+    margin:auto;
+    border:2px solid var(--cyan);
+    border-radius:50%;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:
+        0 0 12px rgba(0,217,255,.8),
+        inset 0 0 15px rgba(0,217,255,.2);
+}
+
+.logo-orbit:before,
+.logo-orbit:after{
+    content:"";
+    position:absolute;
+    border:1px solid var(--cyan);
+    border-radius:50%;
+}
+
+.logo-orbit:before{
+    inset:10px -8px;
+}
+
+.logo-orbit:after{
+    inset:-8px 10px;
+}
+
+.pin{
+    font-size:30px;
+    filter:drop-shadow(0 0 8px red);
+}
+
+.logo h1{
+    font-size:25px;
+    margin-top:13px;
+    letter-spacing:1px;
+}
+
+.logo span{
+    color:var(--cyan);
+    font-size:12px;
+    font-weight:bold;
+    letter-spacing:2px;
+}
+
+.menu-title{
+    color:var(--cyan);
+    font-size:11px;
+    margin:22px 10px 10px;
+}
+
+.menu{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+}
+
+.menu button{
+    width:100%;
+    background:transparent;
+    border:1px solid transparent;
+    color:#dcecff;
+    text-align:left;
+    padding:12px 13px;
+    border-radius:7px;
+    font-size:13px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.menu button:hover{
+    border-color:#075a91;
+    background:rgba(0,120,255,.08);
+    color:white;
+}
+
+.menu button.active{
+    background:
+        linear-gradient(90deg,#1025c9,#007bff);
+    border-color:#00cfff;
+    box-shadow:
+        0 0 16px rgba(0,110,255,.35);
+}
+
+.menu-icon{
+    display:inline-block;
+    width:28px;
+    font-size:18px;
+}
+
+.system-status{
+    position:absolute;
+    left:15px;
+    right:15px;
+    bottom:15px;
+    border:1px solid #073e60;
+    padding:15px;
+    background:#030916;
+}
+
+.system-title{
+    text-align:center;
+    color:var(--cyan);
+    font-size:11px;
+    margin-bottom:13px;
+}
+
+.health{
+    width:105px;
+    height:105px;
+    margin:auto;
+    border-radius:50%;
+    border:8px solid #064e8c;
+    outline:2px solid var(--cyan);
+    outline-offset:-12px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 0 20px rgba(0,217,255,.3);
+}
+
+.health strong{
+    font-size:26px;
+}
+
+.health small{
+    color:var(--cyan);
+    font-size:8px;
+}
+
+.system-online{
+    margin-top:15px;
+    font-size:11px;
+    text-align:center;
+    color:#b8cadb;
+}
+
+.green-dot{
+    display:inline-block;
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:var(--green);
+    box-shadow:0 0 8px var(--green);
+    margin-right:6px;
+}
+
+/* =====================================================
+   MAIN
+===================================================== */
+
+.main{
+    margin-left:245px;
+    width:calc(100% - 245px);
+    padding:15px;
+}
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.topbar{
+    min-height:125px;
+    border:1px solid #06466f;
+    background:
+        linear-gradient(110deg,#030b18,#040914,#020713);
+    padding:20px 28px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:relative;
+    clip-path:polygon(
+        0 0,98% 0,100% 16%,
+        100% 84%,98% 100%,0 100%,
+        0 84%,1% 50%,0 16%
+    );
+}
+
+.welcome small{
+    color:var(--cyan);
+    font-size:12px;
+    font-weight:bold;
+}
+
+.welcome h2{
+    font-size:30px;
+    margin:4px 0;
+}
+
+.welcome p{
+    color:#9db2c8;
+    font-size:13px;
+}
+
+.online{
+    color:var(--green);
+    background:rgba(0,255,136,.09);
+    border:1px solid rgba(0,255,136,.3);
+    border-radius:20px;
+    padding:5px 10px;
+    font-size:11px;
+    margin-left:8px;
+}
+
+.clock-box{
+    border:1px solid #07517d;
+    padding:15px 25px;
+    display:flex;
+    gap:28px;
+    min-width:320px;
+    background:#030b17;
+}
+
+.clock-item{
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+
+.clock-icon{
+    font-size:26px;
+    color:var(--cyan);
+}
+
+.clock-item small{
+    display:block;
+    color:#8094ad;
+    font-size:10px;
+}
+
+.clock-item strong{
+    font-size:14px;
+}
+
+/* =====================================================
+   CREATE
+===================================================== */
+
+.create-row{
+    display:grid;
+    grid-template-columns:1fr 580px;
+    gap:15px;
+    margin-top:15px;
+}
+
+.cyber-panel{
+    background:
+        linear-gradient(145deg,rgba(4,14,29,.98),rgba(2,8,18,.98));
+    border:1px solid #06446c;
+    padding:20px;
+    position:relative;
+    clip-path:polygon(
+        0 0,97% 0,100% 10%,
+        100% 90%,97% 100%,3% 100%,
+        0 90%
+    );
+}
+
+.cyber-panel.purple{
+    border-color:#49208a;
+}
+
+.panel-title{
+    color:var(--cyan);
+    font-size:17px;
+    margin-bottom:5px;
+    letter-spacing:.5px;
+}
+
+.panel-subtitle{
+    color:#a0b4c9;
+    font-size:12px;
+    margin-bottom:15px;
+}
+
+.link-box{
+    display:flex;
+    gap:10px;
+}
+
+.link-display{
+    flex:1;
+    background:#071525;
+    border:1px solid #14456c;
+    padding:13px;
+    color:#b8cadb;
+    border-radius:8px;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+    font-size:13px;
+}
+
+.generate-btn{
+    border:1px solid #00cfff;
+    background:
+        linear-gradient(90deg,#064fff,#7d00ff);
+    color:white;
+    padding:0 22px;
+    border-radius:8px;
+    font-weight:bold;
+    cursor:pointer;
+    box-shadow:0 0 18px rgba(71,0,255,.25);
+}
+
+.generate-btn:hover{
+    transform:translateY(-1px);
+    box-shadow:0 0 25px rgba(0,217,255,.35);
+}
+
+.warning{
+    margin-top:12px;
+    color:#d6e2ee;
+    font-size:12px;
+    line-height:1.6;
+}
+
+.warning b{
+    color:var(--yellow);
+}
+
+/* =====================================================
+   RESULT
+===================================================== */
+
+.result{
+    display:none;
+    margin-top:12px;
+    padding:12px;
+    border:1px solid var(--green);
+    background:rgba(0,255,136,.04);
+    border-radius:8px;
+}
+
+.result-title{
+    color:var(--green);
+    font-size:12px;
+    margin-bottom:7px;
+}
+
+.result-link{
+    color:#9edcff;
+    font-size:11px;
+    word-break:break-all;
+    line-height:1.5;
+}
+
+.copy-btn{
+    margin-top:9px;
+    padding:8px 15px;
+    border:1px solid var(--cyan);
+    background:#05233a;
+    color:white;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.copy-btn:hover{
+    background:#073d5b;
+}
+
+/* =====================================================
+   STATS
+===================================================== */
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+}
+
+.stat{
+    min-height:145px;
+    text-align:center;
+    padding:18px 8px;
+    border:1px solid #093d60;
+    background:#030b18;
+    position:relative;
+}
+
+.stat:nth-child(2){
+    border-color:#52219b;
+}
+
+.stat:nth-child(3){
+    border-color:#064f64;
+}
+
+.stat:nth-child(4){
+    border-color:#6d264c;
+}
+
+.stat-icon{
+    font-size:30px;
+    margin-bottom:8px;
+}
+
+.stat strong{
+    display:block;
+    font-size:28px;
+    margin-bottom:4px;
+}
+
+.stat label{
+    color:#a5b6c8;
+    font-size:10px;
+}
+
+.stat.green .stat-icon,
+.stat.green strong{
+    color:var(--green);
+}
+
+.stat.cyan .stat-icon,
+.stat.cyan strong{
+    color:var(--cyan);
+}
+
+.stat.purple .stat-icon,
+.stat.purple strong{
+    color:#b83cff;
+}
+
+.stat.yellow .stat-icon,
+.stat.yellow strong{
+    color:#ffc400;
+}
+
+/* =====================================================
+   LOWER
+===================================================== */
+
+.lower{
+    display:grid;
+    grid-template-columns:1.35fr 1fr;
+    gap:15px;
+    margin-top:15px;
+}
+
+/* =====================================================
+   MAP
+===================================================== */
+
+.map-panel{
+    padding:12px;
+}
+
+.map-header{
+    padding:5px 10px 12px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.map-title{
+    color:var(--cyan);
+    font-size:17px;
+    font-weight:bold;
+}
+
+.live{
+    background:#064e36;
+    color:#00ff88;
+    border:1px solid #00ff88;
+    border-radius:15px;
+    padding:5px 12px;
+    font-size:10px;
+}
+
+.map-box{
+    height:390px;
+    position:relative;
+    overflow:hidden;
+    border:1px solid #073f63;
+    background:
+        radial-gradient(circle at center,rgba(0,130,255,.18),transparent 20%),
+        repeating-linear-gradient(
+            45deg,
+            rgba(0,217,255,.035) 0,
+            rgba(0,217,255,.035) 1px,
+            transparent 1px,
+            transparent 30px
+        ),
+        #030a16;
+}
+
+.fake-map-lines{
+    position:absolute;
+    inset:0;
+    background:
+        linear-gradient(25deg,transparent 47%,#0b3550 48%,#0b3550 49%,transparent 50%),
+        linear-gradient(130deg,transparent 48%,#0b3550 49%,#0b3550 50%,transparent 51%),
+        linear-gradient(70deg,transparent 48%,#082d47 49%,#082d47 50%,transparent 51%);
+    opacity:.7;
+}
+
+.map-grid{
+    position:absolute;
+    inset:0;
+    background-image:
+        linear-gradient(rgba(0,217,255,.06) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(0,217,255,.06) 1px,transparent 1px);
+    background-size:40px 40px;
+}
+
+.map-location{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    width:170px;
+    height:170px;
+}
+
+.ring{
+    position:absolute;
+    inset:0;
+    border:1px solid rgba(0,160,255,.6);
+    border-radius:50%;
+    animation:pulse 2.5s infinite;
+}
+
+.ring:nth-child(2){
+    inset:25px;
+    animation-delay:.4s;
+}
+
+.ring:nth-child(3){
+    inset:50px;
+    animation-delay:.8s;
+}
+
+.map-pin{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    font-size:48px;
+    filter:drop-shadow(0 0 15px red);
+}
+
+@keyframes pulse{
+    0%,100%{
+        transform:scale(.9);
+        opacity:.5;
     }
-
-    body {
-      min-height: 100vh;
-      background:
-        linear-gradient(
-          135deg,
-          #0f172a,
-          #1e3a8a
-        );
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      padding: 20px;
+    50%{
+        transform:scale(1.05);
+        opacity:1;
     }
-
-    .card {
-
-      width: 100%;
-      max-width: 520px;
-
-      background: white;
-
-      padding: 30px;
-
-      border-radius: 22px;
-
-      box-shadow:
-        0 20px 60px
-        rgba(0,0,0,.35);
-
-      text-align: center;
-    }
-
-    .logo {
-
-      font-size: 65px;
-
-      margin-bottom: 10px;
-    }
-
-    h1 {
-
-      color: #111827;
-
-      font-size: 27px;
-
-      margin-bottom: 8px;
-    }
-
-    .subtitle {
-
-      color: #6b7280;
-
-      margin-bottom: 25px;
-
-      line-height: 1.5;
-    }
-
-    .create-btn {
-
-      width: 100%;
-
-      padding: 17px;
-
-      border: none;
-
-      border-radius: 12px;
-
-      background: #2563eb;
-
-      color: white;
-
-      font-size: 18px;
-
-      font-weight: bold;
-
-      cursor: pointer;
-    }
-
-    .create-btn:hover {
-
-      background: #1d4ed8;
-    }
-
-    .result {
-
-      display: none;
-
-      margin-top: 22px;
-
-      text-align: left;
-    }
-
-    .result-title {
-
-      font-weight: bold;
-
-      color: #111827;
-
-      margin-bottom: 8px;
-    }
-
-    .tracking-id {
-
-      background: #eff6ff;
-
-      color: #1e40af;
-
-      padding: 12px;
-
-      border-radius: 9px;
-
-      word-break: break-all;
-
-      margin-bottom: 12px;
-    }
-
-    .link-box {
-
-      display: flex;
-
-      gap: 8px;
-
-      margin-bottom: 12px;
-    }
-
-    .link-box input {
-
-      flex: 1;
-
-      min-width: 0;
-
-      padding: 12px;
-
-      border: 1px solid #d1d5db;
-
-      border-radius: 9px;
-
-      font-size: 13px;
-    }
-
-    .copy-btn {
-
-      padding: 12px 16px;
-
-      border: none;
-
-      border-radius: 9px;
-
-      background: #16a34a;
-
-      color: white;
-
-      font-weight: bold;
-
-      cursor: pointer;
-    }
-
-    .open-btn {
-
-      width: 100%;
-
-      padding: 13px;
-
-      border: none;
-
-      border-radius: 9px;
-
-      background: #111827;
-
-      color: white;
-
-      font-weight: bold;
-
-      cursor: pointer;
-    }
-
-    .admin-btn {
-
-      width: 100%;
-
-      margin-top: 10px;
-
-      padding: 13px;
-
-      border: none;
-
-      border-radius: 9px;
-
-      background: #7c3aed;
-
-      color: white;
-
-      font-weight: bold;
-
-      cursor: pointer;
-    }
-
-    .success {
-
-      display: none;
-
-      margin-top: 12px;
-
-      padding: 10px;
-
-      border-radius: 9px;
-
-      background: #dcfce7;
-
-      color: #166534;
-
-      font-size: 14px;
-    }
-
-    .note {
-
-      margin-top: 20px;
-
-      color: #6b7280;
-
-      font-size: 12px;
-
-      line-height: 1.5;
-    }
-
-  </style>
-
+}
+
+.map-label{
+    position:absolute;
+    color:#cbd9e8;
+    font-size:12px;
+}
+
+.map-label.one{
+    top:20%;
+    left:20%;
+}
+
+.map-label.two{
+    top:28%;
+    right:20%;
+}
+
+.map-label.three{
+    bottom:18%;
+    left:28%;
+}
+
+.map-label.four{
+    bottom:25%;
+    right:18%;
+}
+
+.map-footer{
+    position:absolute;
+    bottom:10px;
+    left:10px;
+    right:10px;
+    display:flex;
+    justify-content:space-between;
+    color:#91a8bf;
+    font-size:10px;
+}
+
+/* =====================================================
+   DETAILS
+===================================================== */
+
+.details-panel{
+    padding:20px;
+}
+
+.details-grid{
+    display:grid;
+    grid-template-columns:1fr 160px;
+    gap:15px;
+}
+
+.details-list{
+    border:1px solid #073a5d;
+    background:#030b16;
+    padding:5px 15px;
+}
+
+.detail{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    padding:12px 0;
+    border-bottom:1px solid #09253b;
+    font-size:12px;
+}
+
+.detail:last-child{
+    border-bottom:0;
+}
+
+.detail span:first-child{
+    color:#b9c8d8;
+}
+
+.detail span:last-child{
+    color:var(--green);
+    text-align:right;
+}
+
+.last-update{
+    border:1px solid #8d16aa;
+    background:#050617;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+}
+
+.last-update .orbit{
+    width:95px;
+    height:95px;
+    border:1px solid var(--cyan);
+    border-radius:50%;
+    margin:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 0 20px rgba(0,217,255,.25);
+}
+
+.last-update .orbit span{
+    font-size:30px;
+    filter:drop-shadow(0 0 8px red);
+}
+
+.last-update strong{
+    font-size:14px;
+}
+
+.last-update small{
+    color:#91a4b7;
+    margin:5px;
+}
+
+.live-small{
+    color:#00ff88;
+    background:#063b2d;
+    border:1px solid #087d59;
+    padding:5px 10px;
+    border-radius:15px;
+    font-size:9px;
+}
+
+.action-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-top:12px;
+}
+
+.action-btn{
+    padding:13px;
+    background:#032c20;
+    border:1px solid var(--green);
+    color:#fff;
+    border-radius:8px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.action-btn:hover{
+    box-shadow:0 0 15px rgba(0,255,136,.2);
+}
+
+.action-btn.stop{
+    background:#310817;
+    border-color:var(--red);
+    color:#ff9bad;
+}
+
+/* =====================================================
+   ACTIVITY
+===================================================== */
+
+.activity{
+    margin-top:15px;
+}
+
+.activity-row{
+    display:grid;
+    grid-template-columns:10px 90px 1fr auto;
+    gap:10px;
+    padding:10px;
+    border-bottom:1px solid #09253b;
+    font-size:11px;
+    align-items:center;
+}
+
+.activity-time{
+    color:#53bfff;
+}
+
+.activity-text{
+    color:#d4e2ee;
+}
+
+.activity-value{
+    color:var(--green);
+}
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media(max-width:1100px){
+
+.sidebar{
+    width:200px;
+}
+
+.main{
+    margin-left:200px;
+    width:calc(100% - 200px);
+}
+
+.create-row{
+    grid-template-columns:1fr;
+}
+
+.lower{
+    grid-template-columns:1fr;
+}
+
+}
+
+@media(max-width:800px){
+
+.sidebar{
+    position:relative;
+    width:100%;
+    min-height:auto;
+    height:auto;
+}
+
+.system-status{
+    display:none;
+}
+
+.menu{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+}
+
+.main{
+    margin-left:0;
+    width:100%;
+    padding:10px;
+}
+
+.app{
+    display:block;
+}
+
+.topbar{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:15px;
+}
+
+.clock-box{
+    width:100%;
+    min-width:0;
+}
+
+.stats{
+    grid-template-columns:repeat(2,1fr);
+}
+
+.details-grid{
+    grid-template-columns:1fr;
+}
+
+.last-update{
+    min-height:180px;
+}
+
+}
+
+@media(max-width:500px){
+
+.welcome h2{
+    font-size:23px;
+}
+
+.clock-box{
+    gap:12px;
+    padding:12px;
+}
+
+.stats{
+    grid-template-columns:1fr 1fr;
+}
+
+.stat{
+    min-height:120px;
+}
+
+.stat strong{
+    font-size:22px;
+}
+
+.link-box{
+    flex-direction:column;
+}
+
+.generate-btn{
+    height:45px;
+}
+
+.action-row{
+    grid-template-columns:1fr;
+}
+
+.map-box{
+    height:320px;
+}
+
+.activity-row{
+    grid-template-columns:10px 70px 1fr;
+}
+
+.activity-value{
+    display:none;
+}
+
+}
+</style>
 </head>
-
 
 <body>
 
+<div class="app">
 
-<div class="card">
+<!-- =====================================================
+     SIDEBAR
+===================================================== -->
 
+<aside class="sidebar">
 
-  <div class="logo">
-    📍
-  </div>
+<div class="logo">
 
+<div class="logo-orbit">
+<span class="pin">📍</span>
+</div>
 
-  <h1>
-    CBRND Location Tracker
-  </h1>
+<h1>CBRND</h1>
 
+<span>LOCATION TRACKER</span>
 
-  <p class="subtitle">
+</div>
 
-    सुरक्षित Location Tracking Link बनाएँ
-    और उसे दूसरे मोबाइल पर भेजें।
+<div class="menu-title">
+MAIN MENU
+</div>
 
-  </p>
+<nav class="menu">
 
+<button class="active"
+onclick="scrollToSection('dashboard')">
+<span class="menu-icon">▦</span>
+DASHBOARD
+</button>
 
-  <button
-    class="create-btn"
-    onclick="createTrackingLink()"
-  >
-    🔗 Create Tracking Link
-  </button>
+<button onclick="scrollToSection('create')">
+<span class="menu-icon">◉</span>
+LIVE TRACKING
+</button>
 
+<button onclick="showHistory()">
+<span class="menu-icon">◷</span>
+TRACKING HISTORY
+</button>
 
-  <div
-    class="result"
-    id="result"
-  >
+<button>
+<span class="menu-icon">⚙</span>
+SETTINGS
+</button>
 
-    <div class="result-title">
-      🆔 Tracking ID
-    </div>
+<button>
+<span class="menu-icon">♢</span>
+REPORTS
+</button>
 
-    <div
-      class="tracking-id"
-      id="trackingId"
-    >
-      —
-    </div>
+<button>
+<span class="menu-icon">♙</span>
+PROFILE
+</button>
 
+</nav>
 
-    <div class="result-title">
-      🔗 Tracking Link
-    </div>
+<div class="system-status">
 
+<div class="system-title">
+SYSTEM STATUS
+</div>
 
-    <div class="link-box">
+<div class="health">
+<strong>98%</strong>
+<small>SYSTEM HEALTH</small>
+</div>
 
-      <input
-        id="trackingLink"
-        readonly
-      >
+<div class="system-online">
+<span class="green-dot"></span>
+All Systems Operational
+</div>
 
-      <button
-        class="copy-btn"
-        onclick="copyLink()"
-      >
-        📋 Copy
-      </button>
+</div>
 
-    </div>
-
-
-    <button
-      class="open-btn"
-      onclick="openShareLink()"
-    >
-      📱 Open Share Page
-    </button>
-
-
-    <button
-      class="admin-btn"
-      onclick="openAdmin()"
-    >
-      🗺️ Open Admin Tracking
-    </button>
+</aside>
 
 
-    <div
-      class="success"
-      id="copyMessage"
-    >
-      ✅ Link copied successfully!
-    </div>
+<!-- =====================================================
+     MAIN
+===================================================== -->
 
-  </div>
+<main class="main" id="dashboard">
+
+<!-- HEADER -->
+
+<header class="topbar">
+
+<div class="welcome">
+
+<small>WELCOME BACK,</small>
+
+<h2>
+ADMIN
+
+<span class="online">
+<span class="green-dot"></span>
+ONLINE
+</span>
+
+</h2>
+
+<p>
+Secure Location Tracking Dashboard
+</p>
+
+</div>
+
+<div class="clock-box">
+
+<div class="clock-item">
+
+<div class="clock-icon">▣</div>
+
+<div>
+<small>DATE</small>
+<strong id="dateDisplay">--</strong>
+</div>
+
+</div>
+
+<div class="clock-item">
+
+<div class="clock-icon">◷</div>
+
+<div>
+<small>TIME</small>
+<strong id="timeDisplay">--</strong>
+</div>
+
+</div>
+
+</div>
+
+</header>
 
 
-  <div class="note">
+<!-- CREATE -->
 
-    ⚠️ Location केवल user की permission के बाद
-    प्राप्त होगी। Tracking link को केवल
-    authorized व्यक्ति के साथ share करें।
+<section class="create-row" id="create">
 
-  </div>
+<div class="cyber-panel">
 
+<h2 class="panel-title">
+CREATE TRACKING LINK
+</h2>
+
+<p class="panel-subtitle">
+Generate secure location tracking link for mobile device
+</p>
+
+<div class="link-box">
+
+<div class="link-display"
+id="linkDisplay">
+
+🔗 Click "GENERATE LINK" to create tracking link
+
+</div>
+
+<button class="generate-btn"
+onclick="createTrackingLink()">
+
+🚀 GENERATE LINK
+
+</button>
+
+</div>
+
+<div class="warning">
+
+<b>⚠</b>
+
+Location access के लिए user की permission जरूरी है।
+Tracking link को केवल authorized व्यक्ति के साथ share करें।
+
+</div>
+
+<div class="result" id="result">
+
+<div class="result-title">
+✓ TRACKING LINK CREATED
+</div>
+
+<div class="result-link"
+id="generatedLink">
+</div>
+
+<button class="copy-btn"
+onclick="copyTrackingLink()">
+📋 COPY LINK
+</button>
+
+<button class="copy-btn"
+onclick="shareTrackingLink()">
+📤 SHARE
+</button>
+
+</div>
 
 </div>
 
 
+<!-- STATS -->
+
+<div class="stats">
+
+<div class="stat purple">
+
+<div class="stat-icon">⌖</div>
+
+<strong id="activeTracking">
+0
+</strong>
+
+<label>
+ACTIVE<br>
+TRACKING
+</label>
+
+</div>
+
+
+<div class="stat cyan">
+
+<div class="stat-icon">◎</div>
+
+<strong id="accuracyStat">
+--
+</strong>
+
+<label>
+GPS<br>
+ACCURACY
+</label>
+
+</div>
+
+
+<div class="stat green">
+
+<div class="stat-icon">⌁</div>
+
+<strong id="satelliteStat">
+LIVE
+</strong>
+
+<label>
+LOCATION<br>
+STATUS
+</label>
+
+</div>
+
+
+<div class="stat yellow">
+
+<div class="stat-icon">♧</div>
+
+<strong id="alertStat">
+0
+</strong>
+
+<label>
+ACTIVE<br>
+ALERTS
+</label>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- LOWER -->
+
+<section class="lower">
+
+<!-- MAP -->
+
+<div class="cyber-panel map-panel">
+
+<div class="map-header">
+
+<div class="map-title">
+LIVE LOCATION
+</div>
+
+<div class="live">
+<span class="green-dot"></span>
+LIVE
+</div>
+
+</div>
+
+<div class="map-box"
+id="mapBox">
+
+<div class="fake-map-lines"></div>
+
+<div class="map-grid"></div>
+
+<div class="map-label one">
+Ahmedabad
+</div>
+
+<div class="map-label two">
+Vastrapur
+</div>
+
+<div class="map-label three">
+Bodakdev
+</div>
+
+<div class="map-label four">
+CBRND
+</div>
+
+<div class="map-location"
+id="mapLocation">
+
+<div class="ring"></div>
+<div class="ring"></div>
+<div class="ring"></div>
+
+<div class="map-pin">
+📍
+</div>
+
+</div>
+
+<div class="map-footer">
+
+<span>
+LOCATION<br>
+<b style="color:#fff"
+id="mapCoordinates">
+WAITING...
+</b>
+</span>
+
+<span>
+CBRND COMMAND CENTER
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- DETAILS -->
+
+<div class="cyber-panel purple details-panel">
+
+<h2 class="panel-title">
+LOCATION DETAILS
+</h2>
+
+<div class="details-grid">
+
+<div class="details-list">
+
+<div class="detail">
+
+<span>
+◉ TRACKING ID
+</span>
+
+<span id="trackingIdValue">
+—
+</span>
+
+</div>
+
+<div class="detail">
+
+<span>
+♧ LATITUDE
+</span>
+
+<span id="latValue">
+—
+</span>
+
+</div>
+
+<div class="detail">
+
+<span>
+⌖ LONGITUDE
+</span>
+
+<span id="lngValue">
+—
+</span>
+
+</div>
+
+<div class="detail">
+
+<span>
+⚙ ACCURACY
+</span>
+
+<span id="accuracyValue">
+—
+</span>
+
+</div>
+
+<div class="detail">
+
+<span>
+◷ LAST UPDATE
+</span>
+
+<span id="lastUpdateValue">
+—
+</span>
+
+</div>
+
+<div class="detail">
+
+<span>
+◉ CONNECTION
+</span>
+
+<span id="connectionValue">
+WAITING
+</span>
+
+</div>
+
+</div>
+
+
+<div class="last-update">
+
+<small>
+LAST UPDATE
+</small>
+
+<div class="orbit">
+
+<span>
+📍
+</span>
+
+</div>
+
+<strong id="miniTime">
+--:--:--
+</strong>
+
+<small id="miniDate">
+--
+</small>
+
+<div class="live-small">
+LIVE TRACKING
+</div>
+
+</div>
+
+</div>
+
+
+<div class="action-row">
+
+<button class="action-btn"
+onclick="openGoogleMaps()">
+
+🗺 OPEN IN GOOGLE MAPS
+
+</button>
+
+<button class="action-btn stop"
+onclick="stopTracking()">
+
+⛔ STOP TRACKING
+
+</button>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ACTIVITY -->
+
+<section class="cyber-panel activity">
+
+<h2 class="panel-title">
+LIVE ACTIVITY FEED
+</h2>
+
+<div id="activityFeed">
+
+<div class="activity-row">
+
+<span class="green-dot"></span>
+
+<span class="activity-time">
+SYSTEM
+</span>
+
+<span class="activity-text">
+Waiting for tracking activity...
+</span>
+
+<span class="activity-value">
+READY
+</span>
+
+</div>
+
+</div>
+
+</section>
+
+</main>
+
+</div>
+
+
+<!-- =====================================================
+     APPLICATION JAVASCRIPT
+     Firebase SDK IS ALREADY LOADED ABOVE
+===================================================== -->
+
 <script>
 
+/* =====================================================
+   FIREBASE CONFIG
+===================================================== */
 
-  // ==============================================
-  // CREATE RANDOM TRACKING ID
-  // ==============================================
+const firebaseConfig = {
 
-  function generateTrackingID() {
+    apiKey:
+    "YOUR_API_KEY",
+
+    authDomain:
+    "cbrnd-location-tracker.firebaseapp.com",
+
+    databaseURL:
+    "https://cbrnd-location-tracker-default-rtdb.asia-southeast1.firebasedatabase.app",
+
+    projectId:
+    "cbrnd-location-tracker",
+
+    storageBucket:
+    "YOUR_STORAGE_BUCKET",
+
+    messagingSenderId:
+    "YOUR_MESSAGING_SENDER_ID",
+
+    appId:
+    "YOUR_APP_ID"
+
+};
+
+
+/* =====================================================
+   GLOBAL VARIABLES
+===================================================== */
+
+let database = null;
+
+let currentTrackingId = null;
+
+let activeListener = null;
+
+let currentLat = null;
+
+let currentLng = null;
+
+
+/* =====================================================
+   FIREBASE INITIALIZATION
+===================================================== */
+
+function initializeFirebase(){
+
+    try{
+
+        if(
+            typeof firebase === "undefined"
+        ){
+
+            console.error(
+                "Firebase SDK failed to load."
+            );
+
+            setConnectionStatus(
+                "SDK ERROR"
+            );
+
+            return false;
+        }
+
+
+        if(
+            !firebase.apps.length
+        ){
+
+            firebase.initializeApp(
+                firebaseConfig
+            );
+
+        }
+
+
+        database =
+        firebase.database();
+
+
+        console.log(
+            "Firebase initialized successfully."
+        );
+
+        return true;
+
+    }catch(error){
+
+        console.error(
+            "Firebase initialization error:",
+            error
+        );
+
+        setConnectionStatus(
+            "ERROR"
+        );
+
+        return false;
+    }
+
+}
+
+
+/* =====================================================
+   GENERATE TRACKING ID
+===================================================== */
+
+function generateTrackingId(){
 
     const chars =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
     let id = "";
 
-    for (
-      let i = 0;
-      i < 12;
-      i++
-    ) {
+    for(
+        let i = 0;
+        i < 12;
+        i++
+    ){
 
-      id +=
+        id +=
         chars.charAt(
-          Math.floor(
-            Math.random() * chars.length
-          )
+            Math.floor(
+                Math.random() *
+                chars.length
+            )
         );
 
     }
 
     return id;
 
-  }
-
-
-  // ==============================================
-  // CREATE TRACKING LINK
-  // ==============================================
-
-  function createTrackingLink() {
-
-    const trackingID =
-      generateTrackingID();
-
-
-    const baseURL =
-      window.location.origin +
-      window.location.pathname
-        .replace(
-          "index.html",
-          ""
-        );
-
-
-    const shareLink =
-      baseURL +
-      "share.html?id=" +
-      trackingID;
-
-
-    document.getElementById(
-      "trackingId"
-    ).textContent =
-      trackingID;
-
-
-    document.getElementById(
-      "trackingLink"
-    ).value =
-      shareLink;
-
-
-    document.getElementById(
-      "result"
-    ).style.display =
-      "block";
-
-
-    // Save locally
-
-    localStorage.setItem(
-      "lastTrackingID",
-      trackingID
-    );
-
-    localStorage.setItem(
-      "lastTrackingLink",
-      shareLink
-    );
-
-  }
-
-
-  // ==============================================
-  // COPY LINK
-  // ==============================================
-
-  async function copyLink() {
-
-    const input =
-      document.getElementById(
-        "trackingLink"
-      );
-
-
-    try {
-
-      await navigator.clipboard.writeText(
-        input.value
-      );
-
-    } catch (error) {
-
-      input.select();
-
-      document.execCommand(
-        "copy"
-      );
-
-    }
-
-
-    const message =
-      document.getElementById(
-        "copyMessage"
-      );
-
-
-    message.style.display =
-      "block";
-
-
-    setTimeout(
-      function() {
-
-        message.style.display =
-          "none";
-
-      },
-      2500
-    );
-
-  }
-
-
-  // ==============================================
-  // OPEN SHARE PAGE
-  // ==============================================
-
-  function openShareLink() {
-
-    const link =
-      document.getElementById(
-        "trackingLink"
-      ).value;
-
-
-    if (!link) {
-
-      return;
-
-    }
-
-
-    window.open(
-      link,
-      "_blank"
-    );
-
-  }
-
-
-  // ==============================================
-  // OPEN ADMIN
-  // ==============================================
-
-function openAdmin() {
-
-  const trackingID =
-    document.getElementById("trackingId").textContent.trim();
-
-  if (!trackingID || trackingID === "—") {
-    alert("पहले Tracking Link बनाइए।");
-    return;
-  }
-
-  const adminURL =
-    "https://somchandtrust-boo.github.io/CBRND-Location-Tracker/admin.html?id=" +
-    encodeURIComponent(trackingID);
-
-  window.open(adminURL, "_blank");
 }
 
 
+/* =====================================================
+   CREATE TRACKING LINK
+===================================================== */
+
+function createTrackingLink(){
+
+    currentTrackingId =
+    generateTrackingId();
+
+
+    const base =
+    window.location.origin +
+    window.location.pathname;
+
+
+    const link =
+    base +
+    "?id=" +
+    currentTrackingId;
+
+
+    document.getElementById(
+        "generatedLink"
+    ).textContent =
+    link;
+
+
+    document.getElementById(
+        "linkDisplay"
+    ).textContent =
+    link;
+
+
+    document.getElementById(
+        "result"
+    ).style.display =
+    "block";
+
+
+    document.getElementById(
+        "trackingIdValue"
+    ).textContent =
+    currentTrackingId;
+
+
+    addActivity(
+        "New tracking link created",
+        "READY"
+    );
+
+
+    /* Make tracking count 1 */
+
+    document.getElementById(
+        "activeTracking"
+    ).textContent =
+    "1";
+
+
+    /* Automatically listen for this ID */
+
+    startTracking(
+        currentTrackingId
+    );
+
+}
+
+
+/* =====================================================
+   COPY LINK
+===================================================== */
+
+async function copyTrackingLink(){
+
+    const element =
+    document.getElementById(
+        "generatedLink"
+    );
+
+    const link =
+    element.textContent;
+
+
+    if(!link){
+
+        alert(
+            "पहले tracking link generate करें।"
+        );
+
+        return;
+    }
+
+
+    try{
+
+        await navigator.clipboard.writeText(
+            link
+        );
+
+        alert(
+            "Tracking link copied successfully!"
+        );
+
+    }catch(error){
+
+        const temp =
+        document.createElement(
+            "textarea"
+        );
+
+        temp.value =
+        link;
+
+        document.body.appendChild(
+            temp
+        );
+
+        temp.select();
+
+        document.execCommand(
+            "copy"
+        );
+
+        temp.remove();
+
+        alert(
+            "Tracking link copied successfully!"
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   SHARE LINK
+===================================================== */
+
+async function shareTrackingLink(){
+
+    const link =
+    document.getElementById(
+        "generatedLink"
+    ).textContent;
+
+
+    if(!link){
+
+        alert(
+            "पहले tracking link generate करें।"
+        );
+
+        return;
+    }
+
+
+    if(
+        navigator.share
+    ){
+
+        try{
+
+            await navigator.share({
+
+                title:
+                "CBRND Location Tracking",
+
+                text:
+                "Please open this tracking link and allow location permission.",
+
+                url:
+                link
+
+            });
+
+        }catch(error){
+
+            console.log(
+                "Share cancelled."
+            );
+
+        }
+
+    }else{
+
+        copyTrackingLink();
+
+    }
+
+}
+
+
+/* =====================================================
+   GET URL TRACKING ID
+===================================================== */
+
+function getTrackingIdFromURL(){
+
+    const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
+    return params.get(
+        "id"
+    );
+
+}
+
+
+/* =====================================================
+   START TRACKING
+===================================================== */
+
+function startTracking(id){
+
+    if(!id){
+
+        console.warn(
+            "Tracking ID missing."
+        );
+
+        return;
+    }
+
+
+    if(!database){
+
+        const ready =
+        initializeFirebase();
+
+        if(!ready){
+
+            return;
+        }
+
+    }
+
+
+    /* Important:
+       Remove old Firebase listener */
+
+    if(
+        activeListener
+    ){
+
+        try{
+
+            activeListener.off();
+
+        }catch(error){
+
+            console.warn(
+                "Could not remove old listener.",
+                error
+            );
+
+        }
+
+        activeListener =
+        null;
+
+    }
+
+
+    currentTrackingId =
+    id;
+
+
+    document.getElementById(
+        "trackingIdValue"
+    ).textContent =
+    id;
+
+
+    setConnectionStatus(
+        "CONNECTING"
+    );
+
+
+    const ref =
+    database.ref(
+        "locations/" + id
+    );
+
+
+    /* Store listener reference safely */
+
+    activeListener =
+    ref;
+
+
+    ref.on(
+        "value",
+
+        function(snapshot){
+
+            const data =
+            snapshot.val();
+
+
+            if(!data){
+
+                setConnectionStatus(
+                    "WAITING"
+                );
+
+                addActivity(
+                    "Waiting for user location",
+                    "WAITING"
+                );
+
+                return;
+            }
+
+
+            const lat =
+            Number(
+                data.latitude
+            );
+
+
+            const lng =
+            Number(
+                data.longitude
+            );
+
+
+            const accuracy =
+            Number(
+                data.accuracy || 0
+            );
+
+
+            if(
+                !Number.isFinite(lat) ||
+                !Number.isFinite(lng)
+            ){
+
+                console.warn(
+                    "Invalid location data:",
+                    data
+                );
+
+                return;
+            }
+
+
+            currentLat =
+            lat;
+
+            currentLng =
+            lng;
+
+
+            /* =========================================
+               UPDATE LOCATION DETAILS
+            ========================================= */
+
+            document.getElementById(
+                "latValue"
+            ).textContent =
+            lat.toFixed(6) + "°";
+
+
+            document.getElementById(
+                "lngValue"
+            ).textContent =
+            lng.toFixed(6) + "°";
+
+
+            document.getElementById(
+                "accuracyValue"
+            ).textContent =
+            accuracy ?
+            Math.round(accuracy) +
+            " meters" :
+            "—";
+
+
+            document.getElementById(
+                "connectionValue"
+            ).textContent =
+            "CONNECTED";
+
+
+            document.getElementById(
+                "connectionValue"
+            ).style.color =
+            "var(--green)";
+
+
+            /* =========================================
+               TIME
+            ========================================= */
+
+            let updateTime =
+            new Date();
+
+
+            /*
+              If Firebase sends timestamp,
+              use it when valid.
+            */
+
+            if(
+                data.timestamp
+            ){
+
+                const firebaseTime =
+                Number(
+                    data.timestamp
+                );
+
+                if(
+                    Number.isFinite(
+                        firebaseTime
+                    )
+                ){
+
+                    const d =
+                    new Date(
+                        firebaseTime
+                    );
+
+                    if(
+                        !isNaN(
+                            d.getTime()
+                        )
+                    ){
+
+                        updateTime =
+                        d;
+
+                    }
+
+                }
+
+            }
+
+
+            const time =
+            updateTime.toLocaleTimeString(
+                "en-IN"
+            );
+
+
+            const date =
+            updateTime.toLocaleDateString(
+                "en-IN"
+            );
+
+
+            document.getElementById(
+                "lastUpdateValue"
+            ).textContent =
+            time;
+
+
+            document.getElementById(
+                "miniTime"
+            ).textContent =
+            time;
+
+
+            document.getElementById(
+                "miniDate"
+            ).textContent =
+            date;
+
+
+            /* =========================================
+               ACCURACY STAT
+            ========================================= */
+
+            if(
+                accuracy > 0
+            ){
+
+                let score =
+                Math.round(
+                    Math.max(
+                        0,
+                        Math.min(
+                            100,
+                            100 -
+                            (
+                                accuracy / 2
+                            )
+                        )
+                    )
+                );
+
+
+                document.getElementById(
+                    "accuracyStat"
+                ).textContent =
+                score + "%";
+
+            }
+
+
+            /* =========================================
+               LIVE STATUS
+            ========================================= */
+
+            document.getElementById(
+                "satelliteStat"
+            ).textContent =
+            "LIVE";
+
+
+            document.getElementById(
+                "activeTracking"
+            ).textContent =
+            "1";
+
+
+            /* =========================================
+               MAP COORDINATES
+            ========================================= */
+
+            document.getElementById(
+                "mapCoordinates"
+            ).textContent =
+            lat.toFixed(5) +
+            " , " +
+            lng.toFixed(5);
+
+
+            /*
+              Move cyber marker based on coordinates.
+              This is only visual; Google Maps opens
+              the exact real coordinates.
+            */
+
+            updateCyberMap(
+                lat,
+                lng
+            );
+
+
+            /* =========================================
+               ACTIVITY
+            ========================================= */
+
+            addActivity(
+                "Live location received",
+                Math.round(accuracy) +
+                "m"
+            );
+
+        },
+
+        function(error){
+
+            console.error(
+                "Firebase tracking error:",
+                error
+            );
+
+
+            setConnectionStatus(
+                "ERROR"
+            );
+
+
+            addActivity(
+                "Firebase location error",
+                error.code ||
+                "ERROR"
+            );
+
+        }
+
+    );
+
+}
+
+
+/* =====================================================
+   CONNECTION STATUS
+===================================================== */
+
+function setConnectionStatus(
+    status
+){
+
+    const element =
+    document.getElementById(
+        "connectionValue"
+    );
+
+
+    element.textContent =
+    status;
+
+
+    if(
+        status === "CONNECTED"
+    ){
+
+        element.style.color =
+        "var(--green)";
+
+    }else if(
+        status === "ERROR"
+    ){
+
+        element.style.color =
+        "var(--red)";
+
+    }else{
+
+        element.style.color =
+        "var(--yellow)";
+
+    }
+
+}
+
+
+/* =====================================================
+   STOP TRACKING
+===================================================== */
+
+function stopTracking(){
+
+    if(
+        activeListener
+    ){
+
+        try{
+
+            activeListener.off();
+
+        }catch(error){
+
+            console.warn(
+                error
+            );
+
+        }
+
+        activeListener =
+        null;
+
+    }
+
+
+    document.getElementById(
+        "activeTracking"
+    ).textContent =
+    "0";
+
+
+    setConnectionStatus(
+        "STOPPED"
+    );
+
+
+    addActivity(
+        "Tracking stopped",
+        "OFFLINE"
+    );
+
+}
+
+
+/* =====================================================
+   GOOGLE MAPS
+===================================================== */
+
+function openGoogleMaps(){
+
+    if(
+        currentLat === null ||
+        currentLng === null
+    ){
+
+        alert(
+            "अभी location available नहीं है।"
+        );
+
+        return;
+    }
+
+
+    const url =
+    "https://www.google.com/maps?q=" +
+    encodeURIComponent(
+        currentLat +
+        "," +
+        currentLng
+    );
+
+
+    window.open(
+        url,
+        "_blank"
+    );
+
+}
+
+
+/* =====================================================
+   CYBER MAP VISUAL
+===================================================== */
+
+function updateCyberMap(
+    lat,
+    lng
+){
+
+    /*
+      Convert coordinates into a visual
+      position inside the cyber map.
+
+      This is NOT used as geographic map
+      projection. Google Maps button gives
+      the exact real-world location.
+    */
+
+    const marker =
+    document.getElementById(
+        "mapLocation"
+    );
+
+
+    if(!marker){
+        return;
+    }
+
+
+    const x =
+    50 +
+    (
+        (lng % 1) *
+        25
+    );
+
+
+    const y =
+    50 -
+    (
+        (lat % 1) *
+        25
+    );
+
+
+    marker.style.left =
+    Math.max(
+        15,
+        Math.min(
+            85,
+            x
+        )
+    ) + "%";
+
+
+    marker.style.top =
+    Math.max(
+        15,
+        Math.min(
+            85,
+            y
+        )
+    ) + "%";
+
+}
+
+
+/* =====================================================
+   ACTIVITY FEED
+===================================================== */
+
+function addActivity(
+    message,
+    extra=""
+){
+
+    const feed =
+    document.getElementById(
+        "activityFeed"
+    );
+
+
+    const row =
+    document.createElement(
+        "div"
+    );
+
+
+    row.className =
+    "activity-row";
+
+
+    const dot =
+    document.createElement(
+        "span"
+    );
+
+    dot.className =
+    "green-dot";
+
+
+    const time =
+    document.createElement(
+        "span"
+    );
+
+    time.className =
+    "activity-time";
+
+    time.textContent =
+    new Date().toLocaleTimeString(
+        "en-IN"
+    );
+
+
+    const text =
+    document.createElement(
+        "span"
+    );
+
+    text.className =
+    "activity-text";
+
+    text.textContent =
+    message;
+
+
+    const value =
+    document.createElement(
+        "span"
+    );
+
+    value.className =
+    "activity-value";
+
+    value.textContent =
+    extra;
+
+
+    row.appendChild(
+        dot
+    );
+
+    row.appendChild(
+        time
+    );
+
+    row.appendChild(
+        text
+    );
+
+    row.appendChild(
+        value
+    );
+
+
+    feed.prepend(
+        row
+    );
+
+
+    /*
+      Keep only last 8 events
+    */
+
+    while(
+        feed.children.length > 8
+    ){
+
+        feed.removeChild(
+            feed.lastChild
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   CLOCK
+===================================================== */
+
+function updateClock(){
+
+    const now =
+    new Date();
+
+
+    document.getElementById(
+        "dateDisplay"
+    ).textContent =
+    now.toLocaleDateString(
+        "en-IN",
+        {
+            day:"2-digit",
+            month:"short",
+            year:"numeric"
+        }
+    );
+
+
+    document.getElementById(
+        "timeDisplay"
+    ).textContent =
+    now.toLocaleTimeString(
+        "en-IN"
+    );
+
+}
+
+
+setInterval(
+    updateClock,
+    1000
+);
+
+updateClock();
+
+
+/* =====================================================
+   SCROLL
+===================================================== */
+
+function scrollToSection(
+    id
+){
+
+    const element =
+    document.getElementById(
+        id
+    );
+
+
+    if(element){
+
+        element.scrollIntoView({
+            behavior:"smooth"
+        });
+
+    }
+
+}
+
+
+/* =====================================================
+   HISTORY
+===================================================== */
+
+function showHistory(){
+
+    alert(
+        "Tracking History module ready."
+    );
+
+}
+
+
+/* =====================================================
+   PAGE START
+===================================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        /*
+          Firebase is already loaded because
+          SDK scripts are in <head>.
+        */
+
+        const firebaseReady =
+        initializeFirebase();
+
+
+        if(!firebaseReady){
+
+            return;
+        }
+
+
+        /*
+          Check whether this page was opened
+          with ?id=TRACKING_ID
+        */
+
+        const urlId =
+        getTrackingIdFromURL();
+
+
+        if(urlId){
+
+            currentTrackingId =
+            urlId;
+
+
+            document.getElementById(
+                "trackingIdValue"
+            ).textContent =
+            urlId;
+
+
+            document.getElementById(
+                "linkDisplay"
+            ).textContent =
+            window.location.href;
+
+
+            document.getElementById(
+                "generatedLink"
+            ).textContent =
+            window.location.href;
+
+
+            document.getElementById(
+                "result"
+            ).style.display =
+            "block";
+
+
+            addActivity(
+                "Tracking session detected",
+                "CONNECTING"
+            );
+
+
+            /*
+              Start Firebase listener
+            */
+
+            startTracking(
+                urlId
+            );
+
+        }
+
+    }
+);
+
 </script>
 
-
 </body>
-
 </html>
