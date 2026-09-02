@@ -1,2798 +1,947 @@
 <!DOCTYPE html>
 <html lang="hi">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>CBRND Secure Location Tracker</title>
+<meta
+name="viewport"
+content="width=device-width,initial-scale=1.0">
 
-<!-- =========================================================
-     FIREBASE SDK
-     IMPORTANT: These MUST load before firebase.initializeApp()
-========================================================= -->
+<title>CBRND Location Sharing</title>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 <style>
+
 *{
     box-sizing:border-box;
     margin:0;
     padding:0;
 }
 
-:root{
-    --bg:#050812;
-    --panel:#0b1224;
-    --panel2:#101a31;
-    --cyan:#00eaff;
-    --blue:#287cff;
-    --purple:#8b5cff;
-    --green:#00ff88;
-    --red:#ff3b5c;
-    --yellow:#ffd43b;
-    --text:#edf7ff;
-    --muted:#8ea4c2;
-}
-
-html,body{
-    width:100%;
-    min-height:100%;
-}
-
 body{
+
+    min-height:100vh;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    padding:20px;
+
     font-family:
-        "Segoe UI",
-        Arial,
-        Helvetica,
-        sans-serif;
-
-    background:
-        radial-gradient(
-            circle at 10% 10%,
-            rgba(0,234,255,.10),
-            transparent 30%
-        ),
-        radial-gradient(
-            circle at 90% 20%,
-            rgba(139,92,255,.12),
-            transparent 30%
-        ),
-        radial-gradient(
-            circle at 50% 100%,
-            rgba(0,255,136,.06),
-            transparent 35%
-        ),
-        #050812;
-
-    color:var(--text);
-    min-height:100vh;
-    overflow-x:hidden;
-}
-
-body::before{
-    content:"";
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-
-    background-image:
-        linear-gradient(
-            rgba(255,255,255,.025) 1px,
-            transparent 1px
-        ),
-        linear-gradient(
-            90deg,
-            rgba(255,255,255,.025) 1px,
-            transparent 1px
-        );
-
-    background-size:40px 40px;
-    mask-image:linear-gradient(
-        to bottom,
-        black,
-        transparent 90%
-    );
-}
-
-/* =========================================================
-   MAIN
-========================================================= */
-
-.app{
-    width:100%;
-    min-height:100vh;
-    padding:24px;
-}
-
-/* =========================================================
-   TOP HEADER
-========================================================= */
-
-.topbar{
-    max-width:1450px;
-    margin:auto;
-
-    min-height:90px;
-
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:20px;
-
-    padding:18px 24px;
-
-    border:1px solid rgba(0,234,255,.25);
-    border-radius:26px;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(12,23,45,.94),
-            rgba(7,13,28,.94)
-        );
-
-    box-shadow:
-        0 0 35px rgba(0,234,255,.08),
-        inset 0 0 30px rgba(255,255,255,.015);
-
-    position:relative;
-    overflow:hidden;
-}
-
-.topbar::after{
-    content:"";
-    position:absolute;
-    left:0;
-    right:0;
-    bottom:0;
-    height:2px;
-
-    background:
-        linear-gradient(
-            90deg,
-            transparent,
-            var(--cyan),
-            var(--purple),
-            var(--green),
-            transparent
-        );
-
-    opacity:.8;
-}
-
-.brand{
-    display:flex;
-    align-items:center;
-    gap:15px;
-}
-
-.logo{
-    width:58px;
-    height:58px;
-
-    border-radius:50%;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    font-size:28px;
-
-    background:
-        radial-gradient(
-            circle,
-            #162c51 0 35%,
-            #081225 36% 60%,
-            #050812 61%
-        );
-
-    border:2px solid var(--cyan);
-
-    box-shadow:
-        0 0 15px rgba(0,234,255,.6),
-        inset 0 0 15px rgba(0,234,255,.2);
-
-    position:relative;
-}
-
-.logo::before,
-.logo::after{
-    content:"";
-    position:absolute;
-
-    border:1px solid rgba(0,234,255,.45);
-
-    border-radius:50%;
-}
-
-.logo::before{
-    inset:-8px;
-}
-
-.logo::after{
-    inset:-15px;
-    border-color:rgba(139,92,255,.25);
-}
-
-.brand h1{
-    font-size:25px;
-    letter-spacing:.8px;
-}
-
-.brand p{
-    color:var(--cyan);
-    font-size:12px;
-    margin-top:4px;
-    letter-spacing:1.5px;
-}
-
-.status{
-    display:flex;
-    align-items:center;
-    gap:9px;
-
-    padding:9px 15px;
-
-    border-radius:30px;
-
-    background:rgba(0,255,136,.08);
-    border:1px solid rgba(0,255,136,.35);
-
-    color:#bfffe1;
-
-    font-size:13px;
-}
-
-.status-dot{
-    width:10px;
-    height:10px;
-
-    border-radius:50%;
-
-    background:var(--green);
-
-    box-shadow:
-        0 0 12px var(--green);
-
-    animation:pulse 1.5s infinite;
-}
-
-@keyframes pulse{
-    0%,100%{
-        opacity:1;
-        transform:scale(1);
-    }
-
-    50%{
-        opacity:.45;
-        transform:scale(.75);
-    }
-}
-
-/* =========================================================
-   MAIN CONTAINER
-========================================================= */
-
-.container{
-    max-width:1450px;
-    margin:22px auto 0;
-}
-
-/* =========================================================
-   HERO
-========================================================= */
-
-.hero{
-    display:grid;
-    grid-template-columns:1.5fr 1fr;
-
-    gap:20px;
-
-    margin-bottom:20px;
-}
-
-.card{
-    position:relative;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(15,28,52,.95),
-            rgba(7,13,27,.95)
-        );
-
-    border:1px solid rgba(0,234,255,.20);
-
-    border-radius:25px;
-
-    box-shadow:
-        0 20px 50px rgba(0,0,0,.25),
-        inset 0 0 30px rgba(0,234,255,.02);
-
-    overflow:hidden;
-}
-
-.card::before{
-    content:"";
-
-    position:absolute;
-
-    width:100px;
-    height:2px;
-
-    top:0;
-    left:35px;
-
-    background:
-        linear-gradient(
-            90deg,
-            var(--cyan),
-            transparent
-        );
-
-    box-shadow:
-        0 0 15px var(--cyan);
-}
-
-.create-card{
-    padding:28px;
-}
-
-.small-label{
-    color:var(--cyan);
-
-    font-size:12px;
-    font-weight:700;
-
-    letter-spacing:2px;
-
-    margin-bottom:8px;
-}
-
-.create-title{
-    font-size:27px;
-    margin-bottom:8px;
-}
-
-.description{
-    color:var(--muted);
-    font-size:14px;
-    margin-bottom:20px;
-}
-
-.link-box{
-    display:grid;
-    grid-template-columns:1fr auto;
-
-    gap:12px;
-}
-
-.link-display{
-    min-height:55px;
-
-    display:flex;
-    align-items:center;
-
-    padding:0 17px;
-
-    background:#070d1d;
-
-    border:1px solid rgba(255,255,255,.08);
-
-    border-radius:16px;
-
-    color:#a9b8cc;
-
-    overflow:hidden;
-}
-
-.link-display span{
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-}
-
-.generate-btn,
-.copy-btn,
-.location-btn{
-    border:none;
-    color:white;
-
-    font-weight:700;
-
-    cursor:pointer;
-
-    border-radius:16px;
-
-    transition:.2s;
-}
-
-.generate-btn{
-    min-width:170px;
-
-    background:
-        linear-gradient(
-            135deg,
-            var(--blue),
-            var(--purple)
-        );
-
-    box-shadow:
-        0 0 20px rgba(40,124,255,.25);
-}
-
-.generate-btn:hover,
-.copy-btn:hover,
-.location-btn:hover{
-    transform:translateY(-2px);
-
-    box-shadow:
-        0 10px 25px rgba(40,124,255,.25);
-}
-
-.warning{
-    margin-top:16px;
-
-    color:#b8c6d9;
-
-    font-size:12px;
-    line-height:1.7;
-
-    padding:12px 14px;
-
-    border-radius:13px;
-
-    background:rgba(255,212,59,.05);
-
-    border:1px solid rgba(255,212,59,.15);
-}
-
-.warning strong{
-    color:var(--yellow);
-}
-
-.result{
-    display:none;
-
-    margin-top:15px;
-
-    padding:14px;
-
-    border-radius:16px;
-
-    background:
-        rgba(0,255,136,.05);
-
-    border:1px solid rgba(0,255,136,.18);
-}
-
-.result.active{
-    display:block;
-}
-
-.result-title{
-    color:var(--green);
-    font-size:12px;
-    margin-bottom:8px;
-}
-
-.result-link{
-    color:#d8faff;
-    font-size:13px;
-    word-break:break-all;
-}
-
-/* =========================================================
-   QUICK STATS
-========================================================= */
-
-.stats{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:15px;
-
-    padding:20px;
-}
-
-.stat{
-    min-height:120px;
-
-    padding:20px;
-
-    border-radius:20px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(19,34,63,.8),
-            rgba(7,13,28,.8)
-        );
-
-    border:1px solid rgba(255,255,255,.06);
-
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-}
-
-.stat-icon{
-    font-size:23px;
-    margin-bottom:9px;
-}
-
-.stat-number{
-    font-size:28px;
-    font-weight:800;
-}
-
-.stat-label{
-    color:var(--muted);
-    font-size:11px;
-    letter-spacing:1.3px;
-}
-
-/* =========================================================
-   TRACKING MODE
-========================================================= */
-
-.tracking-card{
-    display:none;
-
-    padding:28px;
-
-    margin-bottom:20px;
-
-    text-align:center;
-}
-
-.tracking-card.active{
-    display:block;
-}
-
-.tracking-icon{
-    width:90px;
-    height:90px;
-
-    margin:0 auto 18px;
-
-    border-radius:50%;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    font-size:38px;
-
-    border:2px solid var(--cyan);
-
-    box-shadow:
-        0 0 30px rgba(0,234,255,.35),
-        inset 0 0 25px rgba(0,234,255,.12);
-
-    animation:radar 2s infinite;
-}
-
-@keyframes radar{
-    0%{
-        box-shadow:
-            0 0 15px rgba(0,234,255,.35),
-            0 0 0 0 rgba(0,234,255,.20);
-    }
-
-    70%{
-        box-shadow:
-            0 0 35px rgba(0,234,255,.6),
-            0 0 0 25px rgba(0,234,255,0);
-    }
-
-    100%{
-        box-shadow:
-            0 0 15px rgba(0,234,255,.35),
-            0 0 0 0 rgba(0,234,255,0);
-    }
-}
-
-.tracking-card h2{
-    font-size:25px;
-    margin-bottom:8px;
-}
-
-.tracking-card p{
-    color:var(--muted);
-    max-width:650px;
-    margin:auto;
-    line-height:1.7;
-}
-
-.permission-btn{
-    margin-top:20px;
-
-    padding:15px 24px;
-
-    border:none;
-    border-radius:16px;
-
-    background:
-        linear-gradient(
-            135deg,
-            var(--blue),
-            var(--purple)
-        );
+    Arial,
+    Helvetica,
+    sans-serif;
 
     color:#fff;
 
-    font-size:15px;
-    font-weight:700;
-
-    cursor:pointer;
-
-    box-shadow:
-        0 0 25px rgba(40,124,255,.3);
-}
-
-/* =========================================================
-   LIVE DATA
-========================================================= */
-
-.live-panel{
-    display:none;
-    margin-bottom:20px;
-}
-
-.live-panel.active{
-    display:block;
-}
-
-.live-head{
-    padding:20px 24px;
-
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-
-    border-bottom:1px solid rgba(255,255,255,.07);
-}
-
-.live-head h2{
-    font-size:20px;
-}
-
-.live-badge{
-    padding:7px 12px;
-
-    border-radius:20px;
-
-    background:rgba(0,255,136,.08);
-
-    border:1px solid rgba(0,255,136,.35);
-
-    color:var(--green);
-
-    font-size:11px;
-    font-weight:700;
-}
-
-.live-grid{
-    display:grid;
-    grid-template-columns:1.2fr 1fr;
-    gap:0;
-}
-
-.map-box{
-    min-height:350px;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
     background:
-        radial-gradient(
-            circle,
-            rgba(0,234,255,.12),
-            transparent 35%
-        ),
-        #060b17;
+    radial-gradient(
+        circle at top,
+        #172554,
+        #020617 50%,
+        #000
+    );
 
-    position:relative;
-
-    overflow:hidden;
 }
 
-.map-grid{
-    position:absolute;
-    inset:0;
+.card{
 
-    background-image:
-        linear-gradient(
-            rgba(0,234,255,.06) 1px,
-            transparent 1px
-        ),
-        linear-gradient(
-            90deg,
-            rgba(0,234,255,.06) 1px,
-            transparent 1px
-        );
-
-    background-size:35px 35px;
-}
-
-.radar{
-    width:190px;
-    height:190px;
-
-    border-radius:50%;
-
-    border:1px solid rgba(0,234,255,.35);
-
-    position:relative;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-
-.radar::before,
-.radar::after{
-    content:"";
-    position:absolute;
-
-    border-radius:50%;
-
-    border:1px solid rgba(0,234,255,.22);
-}
-
-.radar::before{
-    inset:25px;
-}
-
-.radar::after{
-    inset:55px;
-}
-
-.radar-line{
-    position:absolute;
-
-    width:50%;
-    height:1px;
-
-    background:
-        linear-gradient(
-            90deg,
-            var(--cyan),
-            transparent
-        );
-
-    transform-origin:left;
-
-    animation:scan 2s linear infinite;
-}
-
-@keyframes scan{
-    from{
-        transform:rotate(0deg);
-    }
-
-    to{
-        transform:rotate(360deg);
-    }
-}
-
-.pin{
-    width:22px;
-    height:22px;
-
-    border-radius:50%;
-
-    background:var(--red);
-
-    border:4px solid white;
-
-    box-shadow:
-        0 0 20px var(--red);
-
-    z-index:3;
-}
-
-.map-label{
-    position:absolute;
-    bottom:18px;
-    left:20px;
-
-    color:#8ba5c4;
-
-    font-size:11px;
-    letter-spacing:1px;
-}
-
-.details{
-    padding:25px;
-}
-
-.detail-row{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-
-    padding:15px 0;
-
-    border-bottom:1px solid rgba(255,255,255,.06);
-}
-
-.detail-row:last-child{
-    border-bottom:none;
-}
-
-.detail-name{
-    color:#8195b0;
-    font-size:12px;
-}
-
-.detail-value{
-    color:#dffcff;
-    font-size:13px;
-    font-weight:700;
-
-    text-align:right;
-
-    max-width:60%;
-
-    word-break:break-word;
-}
-
-.detail-value.green{
-    color:var(--green);
-}
-
-.detail-value.cyan{
-    color:var(--cyan);
-}
-
-.open-map{
     width:100%;
+
+    max-width:500px;
+
+    padding:30px;
+
+    text-align:center;
+
+    border-radius:25px;
+
+    background:
+    rgba(15,23,42,.95);
+
+    border:
+    1px solid
+    rgba(56,189,248,.35);
+
+    box-shadow:
+    0 0 45px
+    rgba(14,165,233,.15);
+
+}
+
+.logo{
+
+    width:85px;
+
+    height:85px;
+
+    margin:
+    0 auto 18px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-radius:50%;
+
+    font-size:40px;
+
+    background:
+    linear-gradient(
+        135deg,
+        #06b6d4,
+        #2563eb,
+        #7c3aed
+    );
+
+    box-shadow:
+    0 0 35px
+    rgba(34,211,238,.35);
+
+}
+
+h1{
+
+    font-size:27px;
+
+    margin-bottom:10px;
+
+}
+
+.subtitle{
+
+    color:#94a3b8;
+
+    line-height:1.6;
+
+    margin-bottom:22px;
+
+}
+
+.info{
+
+    padding:15px;
+
+    margin-bottom:15px;
+
+    border-radius:13px;
+
+    background:#020617;
+
+    border:1px solid #1e3a5f;
+
+    text-align:left;
+
+}
+
+.info-title{
+
+    color:#64748b;
+
+    font-size:11px;
+
+    margin-bottom:5px;
+
+    text-transform:uppercase;
+
+}
+
+.info-value{
+
+    color:#67e8f9;
+
+    font-weight:bold;
+
+    word-break:break-all;
+
+}
+
+.permission-button{
+
+    width:100%;
+
+    padding:15px;
+
+    border:0;
+
+    border-radius:13px;
+
+    color:#fff;
+
+    font-weight:bold;
+
+    font-size:16px;
+
+    background:
+    linear-gradient(
+        135deg,
+        #06b6d4,
+        #2563eb
+    );
+
+    box-shadow:
+    0 8px 25px
+    rgba(37,99,235,.25);
+
+}
+
+.stop-button{
+
+    width:100%;
+
+    margin-top:10px;
+
+    padding:13px;
+
+    border:0;
+
+    border-radius:12px;
+
+    background:#7f1d1d;
+
+    color:#fecaca;
+
+    font-weight:bold;
+
+    display:none;
+
+}
+
+.status{
 
     margin-top:18px;
 
     padding:13px;
 
-    border:none;
-    border-radius:14px;
+    border-radius:11px;
 
-    background:
-        rgba(0,234,255,.08);
+    display:none;
 
-    border:1px solid rgba(0,234,255,.25);
+    font-size:14px;
 
-    color:var(--cyan);
-
-    font-weight:700;
-
-    cursor:pointer;
 }
 
-/* =========================================================
-   ACTIVITY
-========================================================= */
+.status.waiting{
 
-.activity{
-    padding:22px 24px;
+    display:block;
+
+    background:#713f12;
+
+    color:#fef3c7;
+
 }
 
-.activity h2{
-    font-size:18px;
-    margin-bottom:15px;
-    color:var(--cyan);
+.status.success{
+
+    display:block;
+
+    background:#14532d;
+
+    color:#bbf7d0;
+
 }
 
-.activity-list{
-    max-height:220px;
-    overflow:auto;
+.status.error{
+
+    display:block;
+
+    background:#7f1d1d;
+
+    color:#fecaca;
+
 }
 
-.activity-item{
+.details{
+
+    margin-top:15px;
+
+    display:none;
+
+    text-align:left;
+
+}
+
+.detail{
+
     display:flex;
-    align-items:center;
-    gap:12px;
 
-    padding:12px 0;
+    justify-content:space-between;
 
-    border-bottom:1px solid rgba(255,255,255,.05);
+    gap:15px;
 
-    font-size:12px;
+    padding:9px 0;
+
+    border-bottom:1px solid #172033;
+
+    font-size:13px;
+
 }
 
-.activity-dot{
-    width:8px;
-    height:8px;
+.detail span:first-child{
 
-    flex:none;
+    color:#64748b;
 
-    border-radius:50%;
-
-    background:var(--green);
-
-    box-shadow:0 0 10px var(--green);
 }
 
-.activity-time{
-    color:#6faaff;
-    min-width:75px;
-}
+.detail span:last-child{
 
-.activity-message{
-    color:#c5d2e5;
-}
+    color:#fff;
 
-/* =========================================================
-   FOOTER
-========================================================= */
+    font-weight:bold;
+
+}
 
 .footer{
-    max-width:1450px;
-    margin:20px auto 0;
 
-    text-align:center;
+    margin-top:20px;
 
-    padding:20px;
-
-    color:#637792;
+    color:#475569;
 
     font-size:11px;
 
-    letter-spacing:1px;
+    line-height:1.5;
+
 }
 
-/* =========================================================
-   TOAST
-========================================================= */
-
-.toast{
-    position:fixed;
-
-    left:50%;
-    bottom:25px;
-
-    transform:
-        translateX(-50%)
-        translateY(100px);
-
-    opacity:0;
-
-    z-index:9999;
-
-    padding:13px 20px;
-
-    border-radius:14px;
-
-    background:#101b31;
-
-    border:1px solid rgba(0,234,255,.3);
-
-    box-shadow:
-        0 10px 40px rgba(0,0,0,.5);
-
-    transition:.3s;
-
-    font-size:13px;
-}
-
-.toast.show{
-    opacity:1;
-
-    transform:
-        translateX(-50%)
-        translateY(0);
-}
-
-.toast.error{
-    border-color:rgba(255,59,92,.5);
-}
-
-.toast.success{
-    border-color:rgba(0,255,136,.5);
-}
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media(max-width:900px){
-
-    .app{
-        padding:12px;
-    }
-
-    .topbar{
-        border-radius:20px;
-        padding:15px;
-    }
-
-    .brand h1{
-        font-size:19px;
-    }
-
-    .brand p{
-        font-size:9px;
-    }
-
-    .logo{
-        width:48px;
-        height:48px;
-        font-size:22px;
-    }
-
-    .hero{
-        grid-template-columns:1fr;
-    }
-
-    .stats{
-        grid-template-columns:repeat(2,1fr);
-    }
-
-    .live-grid{
-        grid-template-columns:1fr;
-    }
-
-    .link-box{
-        grid-template-columns:1fr;
-    }
-
-    .generate-btn{
-        min-height:52px;
-    }
-}
-
-@media(max-width:520px){
-
-    .topbar{
-        align-items:flex-start;
-    }
-
-    .status{
-        padding:7px 10px;
-        font-size:10px;
-    }
-
-    .create-card{
-        padding:20px;
-    }
-
-    .create-title{
-        font-size:22px;
-    }
-
-    .stats{
-        padding:14px;
-        gap:10px;
-    }
-
-    .stat{
-        min-height:100px;
-        padding:15px;
-    }
-
-    .stat-number{
-        font-size:23px;
-    }
-
-    .details{
-        padding:18px;
-    }
-
-    .map-box{
-        min-height:300px;
-    }
-}
 </style>
+
 </head>
 
 <body>
 
-<div class="app">
+<div class="card">
 
-    <!-- =====================================================
-         HEADER
-    ====================================================== -->
+<div class="logo">
+📍
+</div>
 
-    <header class="topbar">
+<h1>
+CBRND Location Sharing
+</h1>
 
-        <div class="brand">
+<p class="subtitle">
 
-            <div class="logo">
-                📍
-            </div>
+आपकी Location केवल आपकी अनुमति के बाद
+इस tracking session में share होगी।
 
-            <div>
-                <h1>CBRND Location Tracker</h1>
-                <p>SECURE REAL-TIME LOCATION SYSTEM</p>
-            </div>
+</p>
 
-        </div>
 
-        <div class="status">
-            <span class="status-dot"></span>
-            <span id="systemStatus">SYSTEM ONLINE</span>
-        </div>
+<div class="info">
 
-    </header>
+<div class="info-title">
+Tracking ID
+</div>
 
-
-    <main class="container">
-
-        <!-- =================================================
-             CREATE / TRACKING HERO
-        ================================================== -->
-
-        <section class="hero">
-
-            <div class="card create-card">
-
-                <div class="small-label">
-                    SECURE CONTROL
-                </div>
-
-                <h2 class="create-title">
-                    CREATE TRACKING LINK
-                </h2>
-
-                <p class="description">
-                    Secure location tracking link बनाएं और authorized
-                    व्यक्ति के mobile पर share करें।
-                </p>
-
-
-                <div class="link-box">
-
-                    <div class="link-display">
-                        <span id="generatedLink">
-                            Click "Generate Link" to create a tracking link
-                        </span>
-                    </div>
-
-                    <button
-                        class="generate-btn"
-                        id="generateBtn"
-                        type="button"
-                    >
-                        🔗 GENERATE LINK
-                    </button>
-
-                </div>
-
-
-                <div class="result" id="resultBox">
-
-                    <div class="result-title">
-                        ✓ TRACKING LINK READY
-                    </div>
-
-                    <div
-                        class="result-link"
-                        id="resultLink"
-                    ></div>
-
-                    <button
-                        class="copy-btn"
-                        id="copyBtn"
-                        type="button"
-                        style="
-                            margin-top:12px;
-                            padding:11px 18px;
-                            background:linear-gradient(
-                                135deg,
-                                #00a86b,
-                                #00d98b
-                            );
-                        "
-                    >
-                        📋 COPY LINK
-                    </button>
-
-                </div>
-
-
-                <div class="warning">
-
-                    <strong>⚠ ध्यान दें:</strong>
-
-                    Location केवल तब प्राप्त होगी जब दूसरे
-                    व्यक्ति की browser location permission स्वीकार
-                    की जाए। Tracking link केवल authorized व्यक्ति
-                    के साथ share करें।
-
-                </div>
-
-            </div>
-
-
-            <!-- =================================================
-                 STATS
-            ================================================== -->
-
-            <div class="card stats">
-
-                <div class="stat">
-
-                    <div class="stat-icon">
-                        📡
-                    </div>
-
-                    <div
-                        class="stat-number"
-                        id="activeCount"
-                    >
-                        0
-                    </div>
-
-                    <div class="stat-label">
-                        ACTIVE TRACKING
-                    </div>
-
-                </div>
-
-
-                <div class="stat">
-
-                    <div class="stat-icon">
-                        🎯
-                    </div>
-
-                    <div
-                        class="stat-number"
-                        id="accuracyStat"
-                    >
-                        —
-                    </div>
-
-                    <div class="stat-label">
-                        GPS ACCURACY
-                    </div>
-
-                </div>
-
-
-                <div class="stat">
-
-                    <div class="stat-icon">
-                        🌐
-                    </div>
-
-                    <div
-                        class="stat-number"
-                        id="connectionStat"
-                    >
-                        READY
-                    </div>
-
-                    <div class="stat-label">
-                        FIREBASE
-                    </div>
-
-                </div>
-
-
-                <div class="stat">
-
-                    <div class="stat-icon">
-                        🛰️
-                    </div>
-
-                    <div
-                        class="stat-number"
-                        id="gpsStat"
-                    >
-                        WAIT
-                    </div>
-
-                    <div class="stat-label">
-                        GPS STATUS
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- =================================================
-             TRACKING MODE
-        ================================================== -->
-
-        <section
-            class="card tracking-card"
-            id="trackingCard"
-        >
-
-            <div class="tracking-icon">
-                📍
-            </div>
-
-            <h2>
-                Location Permission Required
-            </h2>
-
-            <p>
-                यह page आपकी live location को authorized
-                tracking system में भेजने के लिए browser की
-                GPS permission का उपयोग करेगा।
-                Location sharing शुरू करने के लिए नीचे button दबाएँ।
-            </p>
-
-            <button
-                class="permission-btn"
-                id="permissionBtn"
-                type="button"
-            >
-                📍 ALLOW LOCATION & START
-            </button>
-
-        </section>
-
-
-        <!-- =================================================
-             LIVE LOCATION
-        ================================================== -->
-
-        <section
-            class="card live-panel"
-            id="livePanel"
-        >
-
-            <div class="live-head">
-
-                <h2>
-                    LIVE LOCATION
-                </h2>
-
-                <div class="live-badge">
-                    ● LIVE
-                </div>
-
-            </div>
-
-
-            <div class="live-grid">
-
-                <div class="map-box">
-
-                    <div class="map-grid"></div>
-
-                    <div class="radar">
-
-                        <div class="radar-line"></div>
-
-                        <div class="pin"></div>
-
-                    </div>
-
-                    <div class="map-label">
-                        CBRND GPS MONITOR • REAL-TIME
-                    </div>
-
-                </div>
-
-
-                <div class="details">
-
-                    <div class="detail-row">
-
-                        <span class="detail-name">
-                            TRACKING ID
-                        </span>
-
-                        <span
-                            class="detail-value green"
-                            id="trackingIdDisplay"
-                        >
-                            —
-                        </span>
-
-                    </div>
-
-
-                    <div class="detail-row">
-
-                        <span class="detail-name">
-                            LATITUDE
-                        </span>
-
-                        <span
-                            class="detail-value cyan"
-                            id="latitude"
-                        >
-                            —
-                        </span>
-
-                    </div>
-
-
-                    <div class="detail-row">
-
-                        <span class="detail-name">
-                            LONGITUDE
-                        </span>
-
-                        <span
-                            class="detail-value cyan"
-                            id="longitude"
-                        >
-                            —
-                        </span>
-
-                    </div>
-
-
-                    <div class="detail-row">
-
-                        <span class="detail-name">
-                            GPS ACCURACY
-                        </span>
-
-                        <span
-                            class="detail-value"
-                            id="accuracy"
-                        >
-                            —
-                        </span>
-
-                    </div>
-
-
-                    <div class="detail-row">
-
-                        <span class="detail-name">
-                            LAST UPDATE
-                        </span>
-
-                        <span
-                            class="detail-value"
-                            id="lastUpdate"
-                        >
-                            —
-                        </span>
-
-                    </div>
-
-
-                    <div class="detail-row">
-
-                        <span class="detail-name">
-                            CONNECTION
-                        </span>
-
-                        <span
-                            class="detail-value green"
-                            id="locationConnection"
-                        >
-                            CONNECTING...
-                        </span>
-
-                    </div>
-
-
-                    <button
-                        class="open-map"
-                        id="openMapBtn"
-                        type="button"
-                    >
-                        🗺️ OPEN IN GOOGLE MAPS
-                    </button>
-
-                </div>
-
-            </div>
-
-
-            <!-- =================================================
-                 ACTIVITY
-            ================================================== -->
-
-            <div class="activity">
-
-                <h2>
-                    LIVE ACTIVITY FEED
-                </h2>
-
-                <div
-                    class="activity-list"
-                    id="activityList"
-                ></div>
-
-            </div>
-
-        </section>
-
-    </main>
-
-
-    <footer class="footer">
-
-        🔒 CBRND Secure Location Tracker
-        <br><br>
-        Real-Time GPS Monitoring • © 2026
-
-    </footer>
+<div
+id="trackingIdDisplay"
+class="info-value">
+Loading...
+</div>
 
 </div>
 
 
+<button
+id="permissionButton"
+class="permission-button"
+onclick="startLocationSharing()">
+
+📍 Allow & Share My Location
+
+</button>
+
+
+<button
+id="stopButton"
+class="stop-button"
+onclick="stopLocationSharing()">
+
+⛔ Stop Location Sharing
+
+</button>
+
+
 <div
-    class="toast"
-    id="toast"
-></div>
+id="status"
+class="status">
+</div>
+
+
+<div
+id="details"
+class="details">
+
+<div class="detail">
+
+<span>
+Latitude
+</span>
+
+<span id="lat">
+—
+</span>
+
+</div>
+
+
+<div class="detail">
+
+<span>
+Longitude
+</span>
+
+<span id="lng">
+—
+</span>
+
+</div>
+
+
+<div class="detail">
+
+<span>
+Accuracy
+</span>
+
+<span id="accuracy">
+—
+</span>
+
+</div>
+
+
+<div class="detail">
+
+<span>
+Last Update
+</span>
+
+<span id="updated">
+—
+</span>
+
+</div>
+
+</div>
+
+
+<div class="footer">
+
+CBRND Location Tracking System<br>
+
+Location sharing starts only after browser permission.
+
+</div>
+
+</div>
 
 
 <script>
-/* ============================================================
-   CBRND LOCATION TRACKER
-   ============================================================
 
-   IMPORTANT:
-   This code supports TWO modes:
-
-   1. Normal:
-      index.html
-      -> Create Tracking Link
-
-   2. Tracking:
-      index.html?id=XXXXXXXXXXXX
-      -> Ask location permission
-      -> Send GPS data to Firebase
-
-============================================================ */
-
-
-/* ============================================================
+/* =====================================================
    FIREBASE CONFIG
-============================================================ */
+===================================================== */
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBBoLatjHkL56Lm0viPXcV91xcLewrosmI",
-  authDomain: "cbrnd-location-tracker.firebaseapp.com",
-  databaseURL: "https://cbrnd-location-tracker-default-rtdb.asia-southeast1.firebasedatabase.app/",
-  projectId: "cbrnd-location-tracker",
-  storageBucket: "cbrnd-location-tracker.firebasestorage.app",
-  messagingSenderId: "513696622411",
-  appId: "1:513696622411:web:52df6f0833380f76802ace",
-  measurementId: "G-GCDRNNZQVY"
+
+apiKey:
+"AIzaSyBBoLatjHkL56Lm0viPXcV91xcLewrosmI",
+
+authDomain:
+"cbrnd-location-tracker.firebaseapp.com",
+
+databaseURL:
+"https://cbrnd-location-tracker-default-rtdb.asia-southeast1.firebasedatabase.app/",
+
+projectId:
+"cbrnd-location-tracker",
+
+storageBucket:
+"cbrnd-location-tracker.firebasestorage.app",
+
+messagingSenderId:
+"513696622411",
+
+appId:
+"1:513696622411:web:52df6f0833380f76802ace",
+
+measurementId:
+"G-GCDRNNZQVY"
+
 };
 
-/* ============================================================
-   FIREBASE INITIALIZATION
-============================================================ */
 
-let db = null;
-let firebaseReady = false;
+/* =====================================================
+   VARIABLES
+===================================================== */
+
+let database = null;
+
+let trackingId = null;
+
+let watchId = null;
+
+let sharing = false;
+
+
+/* =====================================================
+   INIT
+===================================================== */
 
 try{
 
-    if(
-        typeof firebase === "undefined"
-    ){
+firebase.initializeApp(
+firebaseConfig
+);
 
-        throw new Error(
-            "Firebase SDK load नहीं हुआ।"
-        );
-
-    }
-
-    firebase.initializeApp(
-        firebaseConfig
-    );
-
-    db = firebase.database();
-
-    firebaseReady = true;
-
-    console.log(
-        "CBRND Firebase initialized successfully"
-    );
+database =
+firebase.database();
 
 }catch(error){
 
-    console.error(
-        "Firebase initialization error:",
-        error
-    );
-
-    document.getElementById(
-        "systemStatus"
-    ).textContent =
-        "FIREBASE CONFIG ERROR";
-
-    document.getElementById(
-        "connectionStat"
-    ).textContent =
-        "ERROR";
-}
-
-
-/* ============================================================
-   DOM
-============================================================ */
-
-const generateBtn =
-    document.getElementById("generateBtn");
-
-const generatedLink =
-    document.getElementById("generatedLink");
-
-const resultBox =
-    document.getElementById("resultBox");
-
-const resultLink =
-    document.getElementById("resultLink");
-
-const copyBtn =
-    document.getElementById("copyBtn");
-
-const trackingCard =
-    document.getElementById("trackingCard");
-
-const livePanel =
-    document.getElementById("livePanel");
-
-const permissionBtn =
-    document.getElementById("permissionBtn");
-
-const activeCount =
-    document.getElementById("activeCount");
-
-const accuracyStat =
-    document.getElementById("accuracyStat");
-
-const connectionStat =
-    document.getElementById("connectionStat");
-
-const gpsStat =
-    document.getElementById("gpsStat");
-
-const trackingIdDisplay =
-    document.getElementById("trackingIdDisplay");
-
-const latitude =
-    document.getElementById("latitude");
-
-const longitude =
-    document.getElementById("longitude");
-
-const accuracy =
-    document.getElementById("accuracy");
-
-const lastUpdate =
-    document.getElementById("lastUpdate");
-
-const locationConnection =
-    document.getElementById(
-        "locationConnection"
-    );
-
-const activityList =
-    document.getElementById("activityList");
-
-const openMapBtn =
-    document.getElementById("openMapBtn");
-
-const toast =
-    document.getElementById("toast");
-
-
-/* ============================================================
-   TRACKING ID
-============================================================ */
-
-function createTrackingId(){
-
-    const chars =
-        "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-
-    let id = "";
-
-    for(
-        let i = 0;
-        i < 12;
-        i++
-    ){
-
-        id +=
-            chars.charAt(
-                Math.floor(
-                    Math.random() *
-                    chars.length
-                )
-            );
-
-    }
-
-    return id;
-}
-
-
-/* ============================================================
-   SAFE FIREBASE KEY
-============================================================ */
-
-function safeKey(value){
-
-    return String(value)
-        .replace(/[.#$/\[\]]/g,"")
-        .trim();
-
-}
-
-
-/* ============================================================
-   TOAST
-============================================================ */
-
-function showToast(
-    message,
-    type="success"
-){
-
-    toast.textContent =
-        message;
-
-    toast.className =
-        "toast show " + type;
-
-    setTimeout(
-        () => {
-
-            toast.className =
-                "toast";
-
-        },
-        3000
-    );
-}
-
-
-/* ============================================================
-   ACTIVITY FEED
-============================================================ */
-
-function addActivity(
-    message,
-    ok=true
-){
-
-    const item =
-        document.createElement("div");
-
-    item.className =
-        "activity-item";
-
-    const dot =
-        document.createElement("span");
-
-    dot.className =
-        "activity-dot";
-
-    if(!ok){
-
-        dot.style.background =
-            "var(--red)";
-
-        dot.style.boxShadow =
-            "0 0 10px var(--red)";
-
-    }
-
-    const time =
-        document.createElement("span");
-
-    time.className =
-        "activity-time";
-
-    time.textContent =
-        new Date().toLocaleTimeString(
-            "en-IN"
-        );
-
-    const msg =
-        document.createElement("span");
-
-    msg.className =
-        "activity-message";
-
-    msg.textContent =
-        message;
-
-    item.appendChild(dot);
-    item.appendChild(time);
-    item.appendChild(msg);
-
-    activityList.prepend(item);
-
-    while(
-        activityList.children.length > 12
-    ){
-
-        activityList.removeChild(
-            activityList.lastChild
-        );
-
-    }
-
-}
-
-
-/* ============================================================
-   CREATE TRACKING LINK
-============================================================ */
-
-async function createTrackingLink(){
-
-    if(!firebaseReady){
-
-        showToast(
-            "Firebase अभी ready नहीं है।",
-            "error"
-        );
-
-        return;
-
-    }
-
-    const id =
-        createTrackingId();
-
-    const path =
-        "locations/" + safeKey(id);
-
-    try{
-
-        /*
-         * Create initial tracking record.
-         */
-
-        await db
-            .ref(path)
-            .set({
-
-                trackingId:id,
-
-                status:"waiting",
-
-                createdAt:
-                    firebase.database.ServerValue.TIMESTAMP,
-
-                latitude:null,
-
-                longitude:null,
-
-                accuracy:null,
-
-                timestamp:null
-
-            });
-
-
-        /*
-         * Build tracking URL.
-         */
-
-        const url =
-            window.location.origin +
-            window.location.pathname +
-            "?id=" +
-            encodeURIComponent(id);
-
-
-        generatedLink.textContent =
-            url;
-
-        resultLink.textContent =
-            url;
-
-        resultBox.classList.add(
-            "active"
-        );
-
-
-        /*
-         * Save locally.
-         */
-
-        localStorage.setItem(
-            "cbrnd_last_tracking_id",
-            id
-        );
-
-
-        /*
-         * Update stat.
-         */
-
-        activeCount.textContent =
-            "1";
-
-        connectionStat.textContent =
-            "ONLINE";
-
-
-        showToast(
-            "Tracking link successfully बनाया गया।"
-        );
-
-
-    }catch(error){
-
-        console.error(
-            "Create tracking error:",
-            error
-        );
-
-        showToast(
-            "Tracking link बनाने में error आया।",
-            "error"
-        );
-
-    }
-
-}
-
-
-/* ============================================================
-   COPY LINK
-============================================================ */
-
-async function copyTrackingLink(){
-
-    const text =
-        resultLink.textContent.trim();
-
-    if(!text){
-
-        showToast(
-            "पहले tracking link बनाएं।",
-            "error"
-        );
-
-        return;
-
-    }
-
-    try{
-
-        await navigator.clipboard.writeText(
-            text
-        );
-
-        showToast(
-            "Tracking link copied ✓"
-        );
-
-    }catch(error){
-
-        /*
-         * Fallback for older browsers.
-         */
-
-        const textarea =
-            document.createElement("textarea");
-
-        textarea.value =
-            text;
-
-        document.body.appendChild(
-            textarea
-        );
-
-        textarea.select();
-
-        document.execCommand(
-            "copy"
-        );
-
-        textarea.remove();
-
-        showToast(
-            "Tracking link copied ✓"
-        );
-
-    }
-
-}
-
-
-/* ============================================================
-   EVENT LISTENERS
-============================================================ */
-
-generateBtn.addEventListener(
-    "click",
-    createTrackingLink
+console.error(error);
+
+showStatus(
+"Firebase initialization failed.",
+"error"
 );
 
-copyBtn.addEventListener(
-    "click",
-    copyTrackingLink
-);
+}
 
 
-/* ============================================================
-   GET TRACKING ID FROM URL
-============================================================ */
+/* =====================================================
+   GET TRACKING ID
+===================================================== */
 
 const params =
-    new URLSearchParams(
-        window.location.search
-    );
+new URLSearchParams(
+window.location.search
+);
 
-const trackingId =
-    params.get("id");
-
-
-/* ============================================================
-   OPEN TRACKING MODE
-============================================================ */
-
-function openTrackingMode(){
-
-    if(!trackingId){
-
-        return;
-
-    }
-
-    const id =
-        safeKey(trackingId);
-
-    if(!id){
-
-        return;
-
-    }
-
-    /*
-     * Hide generator
-     */
-
-    document.querySelector(
-        ".hero"
-    ).style.display =
-        "none";
+trackingId =
+params.get("id");
 
 
-    /*
-     * Show tracking permission card
-     */
+if(!trackingId){
 
-    trackingCard.classList.add(
-        "active"
-    );
+document.getElementById(
+"trackingIdDisplay"
+).textContent =
+"Invalid Tracking Link";
 
+document.getElementById(
+"permissionButton"
+).disabled=true;
 
-    trackingIdDisplay.textContent =
-        id;
+showStatus(
+"❌ Tracking ID नहीं मिला। कृपया सही tracking link खोलें।",
+"error"
+);
 
+}else{
 
-    gpsStat.textContent =
-        "READY";
-
-
-    connectionStat.textContent =
-        firebaseReady
-            ? "ONLINE"
-            : "ERROR";
-
-
-    addActivity(
-        "Tracking session तैयार है। Location permission का इंतजार है।"
-    );
+document.getElementById(
+"trackingIdDisplay"
+).textContent =
+trackingId;
 
 }
 
 
-/* ============================================================
-   START LOCATION TRACKING
-============================================================ */
+/* =====================================================
+   START LOCATION SHARING
+===================================================== */
 
-let watchId =
-    null;
+async function startLocationSharing(){
 
-let lastSentTime =
-    0;
+if(!trackingId){
 
-let lastLatitude =
-    null;
+showStatus(
+"Invalid Tracking ID.",
+"error"
+);
 
-let lastLongitude =
-    null;
+return;
+
+}
+
+
+if(!navigator.geolocation){
+
+showStatus(
+"इस device/browser में GPS Location उपलब्ध नहीं है।",
+"error"
+);
+
+return;
+
+}
+
+
+if(sharing){
+
+return;
+
+}
+
+
+showStatus(
+"📍 Location permission का इंतजार है...",
+"waiting"
+);
+
+
+try{
+
+/*
+   Firebase status
+*/
+
+await database
+.ref("locations/"+trackingId)
+.update({
+
+status:"requesting",
+
+updatedAt:
+firebase.database.ServerValue.TIMESTAMP
+
+});
+
+
+}catch(error){
+
+console.error(error);
+
+}
 
 
 /*
- * Minimum Firebase update interval.
- *
- * This prevents hundreds of writes per minute
- * while still keeping tracking responsive.
- */
+   Browser permission
+*/
 
-const UPDATE_INTERVAL =
-    2500;
+watchId =
+navigator.geolocation.watchPosition(
+
+locationSuccess,
+
+locationError,
+
+{
+
+enableHighAccuracy:true,
+
+maximumAge:2000,
+
+timeout:20000
+
+}
+
+);
 
 
-/* ============================================================
-   DISTANCE CALCULATION
-============================================================ */
+sharing=true;
 
-function distanceMeters(
-    lat1,
-    lon1,
-    lat2,
-    lon2
-){
 
-    const R =
-        6371000;
+document.getElementById(
+"permissionButton"
+).style.display="none";
 
-    const p1 =
-        lat1 * Math.PI / 180;
-
-    const p2 =
-        lat2 * Math.PI / 180;
-
-    const dp =
-        (lat2-lat1) *
-        Math.PI / 180;
-
-    const dl =
-        (lon2-lon1) *
-        Math.PI / 180;
-
-    const a =
-        Math.sin(dp/2) *
-        Math.sin(dp/2) +
-
-        Math.cos(p1) *
-        Math.cos(p2) *
-
-        Math.sin(dl/2) *
-        Math.sin(dl/2);
-
-    const c =
-        2 *
-        Math.atan2(
-            Math.sqrt(a),
-            Math.sqrt(1-a)
-        );
-
-    return R*c;
+document.getElementById(
+"stopButton"
+).style.display="block";
 
 }
 
 
-/* ============================================================
+/* =====================================================
    GPS SUCCESS
-============================================================ */
+===================================================== */
 
-async function handlePosition(
-    position
-){
+async function locationSuccess(position){
 
-    const now =
-        Date.now();
+const coords =
+position.coords;
 
-    const coords =
-        position.coords;
 
-    const lat =
-        Number(
-            coords.latitude
-        );
+const latitude =
+Number(coords.latitude);
 
-    const lon =
-        Number(
-            coords.longitude
-        );
+const longitude =
+Number(coords.longitude);
 
-    const acc =
-        Number(
-            coords.accuracy
-        );
+const accuracy =
+Number(coords.accuracy || 0);
 
 
-    /*
-     * Validate GPS values.
-     */
+const speed =
+coords.speed === null
+? null
+: Number(coords.speed);
 
-    if(
-        !Number.isFinite(lat) ||
-        !Number.isFinite(lon)
-    ){
+const heading =
+coords.heading === null
+? null
+: Number(coords.heading);
 
-        addActivity(
-            "Invalid GPS data received.",
-            false
-        );
 
-        return;
+document.getElementById(
+"lat"
+).textContent =
+latitude.toFixed(6);
 
-    }
 
+document.getElementById(
+"lng"
+).textContent =
+longitude.toFixed(6);
 
-    /*
-     * Ignore extremely frequent duplicate updates.
-     */
 
-    let moved =
-        true;
+document.getElementById(
+"accuracy"
+).textContent =
+Math.round(accuracy)+" m";
 
-    if(
-        lastLatitude !== null &&
-        lastLongitude !== null
-    ){
 
-        moved =
-            distanceMeters(
-                lastLatitude,
-                lastLongitude,
-                lat,
-                lon
-            ) >= 2;
+document.getElementById(
+"updated"
+).textContent =
+new Date().toLocaleString();
 
-    }
 
+document.getElementById(
+"details"
+).style.display="block";
 
-    if(
-        now - lastSentTime <
-            UPDATE_INTERVAL &&
-        !moved
-    ){
 
-        return;
+showStatus(
+"🟢 Location successfully sharing with the tracking session.",
+"success"
+);
 
-    }
 
+try{
 
-    lastSentTime =
-        now;
+await database
+.ref("locations/"+trackingId)
+.update({
 
-    lastLatitude =
-        lat;
+trackingId:trackingId,
 
-    lastLongitude =
-        lon;
+status:"active",
 
+latitude:latitude,
 
-    /*
-     * Update UI immediately.
-     */
+longitude:longitude,
 
-    latitude.textContent =
-        lat.toFixed(7) + "°";
+accuracy:accuracy,
 
-    longitude.textContent =
-        lon.toFixed(7) + "°";
+speed:speed,
 
-    accuracy.textContent =
-        Number.isFinite(acc)
-            ? acc.toFixed(1) + " meters"
-            : "—";
+heading:heading,
 
-    accuracyStat.textContent =
-        Number.isFinite(acc)
-            ? Math.round(acc) + "m"
-            : "—";
+timestamp:
+firebase.database.ServerValue.TIMESTAMP,
 
-    lastUpdate.textContent =
-        new Date(now).toLocaleTimeString(
-            "en-IN"
-        );
+updatedAt:
+firebase.database.ServerValue.TIMESTAMP
 
-    gpsStat.textContent =
-        "LOCKED";
-
-    locationConnection.textContent =
-        "STRONG";
+});
 
-    connectionStat.textContent =
-        "ONLINE";
+}catch(error){
 
+console.error(error);
 
-    /*
-     * Open live panel.
-     */
+showStatus(
+"Firebase Error: "+error.message,
+"error"
+);
 
-    trackingCard.classList.remove(
-        "active"
-    );
-
-    livePanel.classList.add(
-        "active"
-    );
-
-
-    /*
-     * Prepare Firebase payload.
-     */
-
-    const data = {
-
-        trackingId:
-            safeKey(trackingId),
-
-        latitude:
-            lat,
-
-        longitude:
-            lon,
-
-        accuracy:
-            Number.isFinite(acc)
-                ? acc
-                : null,
-
-        altitude:
-            coords.altitude !== null
-                ? Number(
-                    coords.altitude
-                )
-                : null,
-
-        heading:
-            coords.heading !== null
-                ? Number(
-                    coords.heading
-                )
-                : null,
-
-        speed:
-            coords.speed !== null
-                ? Number(
-                    coords.speed
-                )
-                : null,
-
-        timestamp:
-            firebase.database.ServerValue
-                .TIMESTAMP,
-
-        status:
-            "active"
-
-    };
-
-
-    /*
-     * IMPORTANT:
-     * Same Firebase path used by Admin:
-     *
-     * locations/{trackingId}
-     */
-
-    try{
-
-        await db
-            .ref(
-                "locations/" +
-                safeKey(trackingId)
-            )
-            .update(
-                data
-            );
-
-
-        addActivity(
-            "Location updated successfully • Accuracy: " +
-            (
-                Number.isFinite(acc)
-                    ? acc.toFixed(1)
-                    : "—"
-            ) +
-            "m"
-        );
-
-
-    }catch(error){
-
-        console.error(
-            "Firebase location write error:",
-            error
-        );
-
-        locationConnection.textContent =
-            "WRITE ERROR";
-
-        connectionStat.textContent =
-            "ERROR";
-
-        addActivity(
-            "Firebase location update failed.",
-            false
-        );
-
-        showToast(
-            "Firebase में location save नहीं हुई। Rules check करें।",
-            "error"
-        );
-
-    }
+}
 
 }
 
 
-/* ============================================================
+/* =====================================================
    GPS ERROR
-============================================================ */
+===================================================== */
 
-function handleLocationError(
-    error
+function locationError(error){
+
+console.error(
+"GPS Error:",
+error
+);
+
+
+switch(error.code){
+
+case 1:
+
+showStatus(
+"❌ Location Permission denied. Browser settings में Location Allow करें।",
+"error"
+);
+
+break;
+
+
+case 2:
+
+showStatus(
+"❌ Location उपलब्ध नहीं है। GPS/Location Services चालू करें।",
+"error"
+);
+
+break;
+
+
+case 3:
+
+showStatus(
+"⏳ Location request timeout. फिर से कोशिश करें।",
+"error"
+);
+
+break;
+
+
+default:
+
+showStatus(
+"❌ Location प्राप्त नहीं हो सकी।",
+"error"
+);
+
+}
+
+
+sharing=false;
+
+document.getElementById(
+"permissionButton"
+).style.display="block";
+
+document.getElementById(
+"stopButton"
+).style.display="none";
+
+}
+
+
+/* =====================================================
+   STOP
+===================================================== */
+
+async function stopLocationSharing(){
+
+if(
+watchId !== null
 ){
 
-    console.error(
-        "GPS error:",
-        error
-    );
+navigator.geolocation.clearWatch(
+watchId
+);
 
-    gpsStat.textContent =
-        "ERROR";
-
-    locationConnection.textContent =
-        "GPS ERROR";
-
-
-    let message =
-        "Location प्राप्त नहीं हो सकी।";
-
-
-    switch(
-        error.code
-    ){
-
-        case 1:
-
-            message =
-                "Location permission denied. Browser में Location Allow करें।";
-
-            break;
-
-
-        case 2:
-
-            message =
-                "GPS location उपलब्ध नहीं है।";
-
-            break;
-
-
-        case 3:
-
-            message =
-                "GPS request timeout. फिर कोशिश की जा रही है।";
-
-            break;
-
-    }
-
-
-    addActivity(
-        message,
-        false
-    );
-
-
-    showToast(
-        message,
-        "error"
-    );
+watchId=null;
 
 }
 
 
-/* ============================================================
-   START WATCH
-============================================================ */
-
-function startLocationTracking(){
-
-    if(!trackingId){
-
-        return;
-
-    }
+sharing=false;
 
 
-    if(!firebaseReady){
+document.getElementById(
+"permissionButton"
+).style.display="block";
 
-        showToast(
-            "Firebase connection available नहीं है।",
-            "error"
-        );
-
-        return;
-
-    }
+document.getElementById(
+"stopButton"
+).style.display="none";
 
 
-    if(
-        !("geolocation" in navigator)
-    ){
+try{
 
-        showToast(
-            "इस browser में GPS support नहीं है।",
-            "error"
-        );
+await database
+.ref("locations/"+trackingId)
+.update({
 
-        return;
+status:"stopped",
 
-    }
+updatedAt:
+firebase.database.ServerValue.TIMESTAMP
 
+});
 
-    /*
-     * Prevent duplicate watchers.
-     */
+}catch(error){
 
-    if(
-        watchId !== null
-    ){
-
-        navigator.geolocation.clearWatch(
-            watchId
-        );
-
-        watchId =
-            null;
-
-    }
-
-
-    gpsStat.textContent =
-        "SEARCH";
-
-
-    locationConnection.textContent =
-        "SEARCHING...";
-
-
-    addActivity(
-        "High accuracy GPS tracking शुरू किया जा रहा है।"
-    );
-
-
-    /*
-     * Continuous GPS tracking.
-     */
-
-    watchId =
-        navigator.geolocation.watchPosition(
-
-            handlePosition,
-
-            handleLocationError,
-
-            {
-
-                enableHighAccuracy:true,
-
-                /*
-                 * Do not use stale GPS data for too long.
-                 */
-
-                maximumAge:2000,
-
-                /*
-                 * GPS response timeout.
-                 */
-
-                timeout:20000
-
-            }
-
-        );
-
-
-    /*
-     * Save status immediately.
-     */
-
-    db
-        .ref(
-            "locations/" +
-            safeKey(trackingId)
-        )
-        .update({
-
-            trackingId:
-                safeKey(trackingId),
-
-            status:
-                "requesting",
-
-            client:
-                "browser",
-
-            startedAt:
-                firebase.database.ServerValue
-                    .TIMESTAMP
-
-        })
-        .catch(
-            error => {
-
-                console.error(
-                    error
-                );
-
-            }
-        );
+console.error(error);
 
 }
 
 
-/* ============================================================
-   PERMISSION BUTTON
-============================================================ */
-
-permissionBtn.addEventListener(
-    "click",
-    function(){
-
-        /*
-         * The browser permission prompt
-         * is triggered by this user action.
-         */
-
-        startLocationTracking();
-
-    }
+showStatus(
+"⛔ Location sharing stopped.",
+"waiting"
 );
 
-
-/* ============================================================
-   GOOGLE MAPS
-============================================================ */
-
-openMapBtn.addEventListener(
-    "click",
-    function(){
-
-        const lat =
-            parseFloat(
-                latitude.textContent
-            );
-
-        const lon =
-            parseFloat(
-                longitude.textContent
-            );
+}
 
 
-        if(
-            !Number.isFinite(lat) ||
-            !Number.isFinite(lon)
-        ){
+/* =====================================================
+   STATUS
+===================================================== */
 
-            showToast(
-                "पहले GPS location प्राप्त होने दें।",
-                "error"
-            );
+function showStatus(
+text,
+type
+){
 
-            return;
-
-        }
-
-
-        const url =
-            "https://www.google.com/maps?q=" +
-            encodeURIComponent(
-                lat + "," + lon
-            );
-
-
-        window.open(
-            url,
-            "_blank",
-            "noopener"
-        );
-
-    }
+const status =
+document.getElementById(
+"status"
 );
 
+status.textContent=text;
 
-/* ============================================================
-   PAGE CLOSE / STOP WATCH
-============================================================ */
+status.className=
+"status "+type;
+
+}
+
+
+/* =====================================================
+   PAGE CLOSE
+===================================================== */
 
 window.addEventListener(
-    "beforeunload",
-    function(){
+"beforeunload",
+function(){
 
-        if(
-            watchId !== null &&
-            "geolocation" in navigator
-        ){
+if(
+watchId !== null
+){
 
-            navigator.geolocation.clearWatch(
-                watchId
-            );
-
-        }
-
-    }
+navigator.geolocation.clearWatch(
+watchId
 );
-
-
-/* ============================================================
-   TRACKING MODE START
-============================================================ */
-
-if(trackingId){
-
-    openTrackingMode();
 
 }
 
+});
 
-/* ============================================================
-   NORMAL MODE
-============================================================ */
-
-else{
-
-    connectionStat.textContent =
-        firebaseReady
-            ? "ONLINE"
-            : "ERROR";
-
-}
-
-
-/* ============================================================
-   FIREBASE CONNECTION MONITOR
-============================================================ */
-
-if(firebaseReady){
-
-    const connectedRef =
-        db.ref(".info/connected");
-
-    connectedRef.on(
-        "value",
-        function(snapshot){
-
-            if(
-                snapshot.val() === true
-            ){
-
-                connectionStat.textContent =
-                    "ONLINE";
-
-            }else{
-
-                connectionStat.textContent =
-                    "OFFLINE";
-
-            }
-
-        }
-    );
-
-}
-
-
-/* ============================================================
-   CONSOLE
-============================================================ */
-
-console.log(
-    "CBRND Location Tracker loaded"
-);
-
-console.log(
-    "Firebase:",
-    firebaseReady
-        ? "READY"
-        : "ERROR"
-);
-
-console.log(
-    "Tracking ID:",
-    trackingId || "CREATE MODE"
-);
 </script>
 
 </body>
+
 </html>
